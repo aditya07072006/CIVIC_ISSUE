@@ -45,11 +45,39 @@ def _ensure_upvotes_table():
     finally:
         db.close()
 
+
+def _ensure_feedback_table():
+    from database import get_db
+    db = get_db()
+    try:
+        with db.cursor() as cursor:
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS issue_feedback (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    issue_id INT NOT NULL,
+                    user_id INT NOT NULL,
+                    is_satisfied BOOLEAN NOT NULL,
+                    rating TINYINT NULL,
+                    comment TEXT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    UNIQUE KEY uniq_issue_user_feedback (issue_id, user_id),
+                    FOREIGN KEY (issue_id) REFERENCES issues(id) ON DELETE CASCADE,
+                    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+                )
+            """)
+            db.commit()
+    finally:
+        db.close()
+
 with app.app_context():
     try:
         _ensure_upvotes_table()
     except Exception as e:
         print(f"[WARN] Could not create upvotes table on startup: {e}")
+    try:
+        _ensure_feedback_table()
+    except Exception as e:
+        print(f"[WARN] Could not create feedback table on startup: {e}")
 
 app.register_blueprint(auth_bp, url_prefix="/api/auth")
 app.register_blueprint(issues_bp, url_prefix="/api/issues")

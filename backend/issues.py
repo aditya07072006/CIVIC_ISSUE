@@ -62,6 +62,7 @@ def create_issue():
     severity = request.form.get("severity", "").strip()
     latitude = request.form.get("latitude")
     longitude = request.form.get("longitude")
+    address = request.form.get("address", "").strip()
 
     if not all([title, description, category, severity]):
         return jsonify({"error": "title, description, category, severity are required"}), 400
@@ -73,7 +74,7 @@ def create_issue():
         try:
             with db.cursor() as cursor:
                 cursor.execute(
-                    "SELECT id, latitude, longitude FROM issues WHERE category = %s AND status != 'resolved'",
+                    "SELECT id, latitude, longitude FROM issues WHERE category = %s AND status != 'resolved' AND deleted_at IS NULL",
                     (category,),
                 )
                 existing = cursor.fetchall()
@@ -110,11 +111,11 @@ def create_issue():
         with db.cursor() as cursor:
             cursor.execute(
                 """INSERT INTO issues (title, description, category, severity, latitude, longitude,
-                   image, status, priority, sla_hours, user_id)
-                   VALUES (%s, %s, %s, %s, %s, %s, %s, 'pending', %s, %s, %s)""",
+                   image, address, status, priority, sla_hours, user_id)
+                   VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 'pending', %s, %s, %s)""",
                 (title, description, category, severity,
                  latitude or None, longitude or None,
-                 image_filename, priority, sla_hours, user_id),
+                 image_filename, address or None, priority, sla_hours, user_id),
             )
             issue_id = cursor.lastrowid
             add_timeline(db, issue_id, "Issue reported by citizen", user_id)
@@ -152,7 +153,7 @@ def get_issues():
                        FROM issues i
                        JOIN users u ON i.user_id = u.id
                        LEFT JOIN issue_upvotes up ON i.id = up.issue_id
-                       WHERE 1=1"""
+                       WHERE i.deleted_at IS NULL"""
             params = [user_id]
 
             if user["role"] == "citizen":
@@ -178,6 +179,138 @@ def get_issues():
             cursor.execute(query, params)
             issues = [serialize_issue(i) for i in cursor.fetchall()]
             return jsonify(issues), 200
+    finally:
+        db.close()
+
+
+@issues_bp.route("/public/list", methods=["GET"])
+@jwt_required()
+def get_public_issues():
+    status = request.args.get("status")
+    category = request.args.get("category")
+    search = request.args.get("search")
+    sort_by = request.args.get("sort_by", "newest")
+
+    db = get_db()
+    try:
+        with db.cursor() as cursor:
+            query = """SELECT
+                         i.id,
+                         i.title,
+                         i.description,
+                         i.category,
+                         i.severity,
+                         i.status,
+                         i.address,
+                         i.latitude,
+                         i.longitude,
+                         i.image,
+                         i.created_at,
+                         i.updated_at,
+                         u.name AS reporter_name,
+                         COUNT(DISTINCT up.user_id) AS upvote_count,
+                         AVG(f.rating) AS avg_rating,
+                         COUNT(f.id) AS feedback_count
+                       FROM issues i
+                       JOIN users u ON i.user_id = u.id
+                       LEFT JOIN issue_upvotes up ON up.issue_id = i.id
+                       LEFT JOIN issue_feedback f ON f.issue_id = i.id
+                       WHERE i.deleted_at IS NULL"""
+            params = []
+
+            if status == "resolved":
+                query += " AND i.status = 'resolved'"
+            elif status == "unresolved":
+                query += " AND i.status IN ('pending', 'in_progress', 'rejected')"
+            elif status in {"pending", "in_progress", "resolved", "rejected"}:
+                query += " AND i.status = %s"
+                params.append(status)
+
+            if category:
+                query += " AND i.category = %s"
+                params.append(category)
+
+            if search:
+                query += " AND (i.title LIKE %s OR i.description LIKE %s OR i.address LIKE %s)"
+                like = f"%{search}%"
+                params.extend([like, like, like])
+
+            query += " GROUP BY i.id"
+
+            if sort_by == "oldest":
+                query += " ORDER BY i.created_at ASC"
+            elif sort_by == "rating_high":
+                query += " ORDER BY (avg_rating IS NULL) ASC, avg_rating DESC, feedback_count DESC, i.created_at DESC"
+            elif sort_by == "rating_low":
+                query += " ORDER BY (avg_rating IS NULL) ASC, avg_rating ASC, feedback_count DESC, i.created_at DESC"
+            elif sort_by == "most_upvoted":
+                query += " ORDER BY upvote_count DESC, i.created_at DESC"
+            else:
+                query += " ORDER BY i.created_at DESC"
+
+            cursor.execute(query, params)
+            rows = cursor.fetchall()
+
+            for row in rows:
+                for dt_key in ["created_at", "updated_at"]:
+                    if row.get(dt_key) and hasattr(row[dt_key], "isoformat"):
+                        row[dt_key] = row[dt_key].isoformat()
+                row["avg_rating"] = float(row["avg_rating"]) if row.get("avg_rating") is not None else None
+
+            return jsonify(rows), 200
+    finally:
+        db.close()
+
+
+@issues_bp.route("/public/stats", methods=["GET"])
+@jwt_required()
+def get_public_stats():
+    db = get_db()
+    try:
+        with db.cursor() as cursor:
+            cursor.execute("SELECT COUNT(*) AS total FROM issues WHERE deleted_at IS NULL")
+            total = cursor.fetchone()["total"]
+
+            cursor.execute("SELECT COUNT(*) AS resolved FROM issues WHERE deleted_at IS NULL AND status = 'resolved'")
+            resolved = cursor.fetchone()["resolved"]
+
+            cursor.execute("""
+                SELECT COUNT(*) AS unresolved
+                FROM issues
+                WHERE deleted_at IS NULL AND status IN ('pending', 'in_progress', 'rejected')
+            """)
+            unresolved = cursor.fetchone()["unresolved"]
+
+            cursor.execute(
+                "SELECT category, COUNT(*) AS count FROM issues WHERE deleted_at IS NULL GROUP BY category ORDER BY count DESC"
+            )
+            by_category = {r["category"]: r["count"] for r in cursor.fetchall()}
+
+            cursor.execute(
+                "SELECT severity, COUNT(*) AS count FROM issues WHERE deleted_at IS NULL GROUP BY severity"
+            )
+            by_severity = {r["severity"]: r["count"] for r in cursor.fetchall()}
+
+            cursor.execute(
+                "SELECT status, COUNT(*) AS count FROM issues WHERE deleted_at IS NULL GROUP BY status"
+            )
+            by_status = {r["status"]: r["count"] for r in cursor.fetchall()}
+
+            cursor.execute("SELECT AVG(rating) AS avg_rating FROM issue_feedback WHERE rating IS NOT NULL")
+            avg_rating = cursor.fetchone()["avg_rating"]
+
+            return jsonify(
+                {
+                    "total": total,
+                    "resolved": resolved,
+                    "unresolved": unresolved,
+                    "resolution_rate": round((resolved / total) * 100, 1) if total else 0,
+                    "avg_rating": round(float(avg_rating), 2) if avg_rating is not None else 0,
+                    "by_category": by_category,
+                    "by_severity": by_severity,
+                    "by_status": by_status,
+                }
+            ), 200
     finally:
         db.close()
 
@@ -262,17 +395,63 @@ def delete_issue(issue_id):
     db = get_db()
     try:
         with db.cursor() as cursor:
-            cursor.execute("SELECT image FROM issues WHERE id = %s", (issue_id,))
+            cursor.execute("SELECT id FROM issues WHERE id = %s", (issue_id,))
             row = cursor.fetchone()
             if not row:
                 return jsonify({"error": "Issue not found"}), 404
-            if row["image"]:
-                img_path = os.path.join(Config.UPLOAD_FOLDER, row["image"])
-                if os.path.exists(img_path):
-                    os.remove(img_path)
-            cursor.execute("DELETE FROM issues WHERE id = %s", (issue_id,))
+            cursor.execute(
+                "UPDATE issues SET deleted_at = NOW() WHERE id = %s",
+                (issue_id,)
+            )
             db.commit()
             return jsonify({"message": "Issue deleted"}), 200
+    finally:
+        db.close()
+
+
+@issues_bp.route("/deleted/list", methods=["GET"])
+@jwt_required()
+def get_deleted_issues():
+    user_id = get_jwt_identity()
+    user = get_user(user_id)
+    if user["role"] != "admin":
+        return jsonify({"error": "Admin access required"}), 403
+
+    category = request.args.get("category")
+    severity = request.args.get("severity")
+    search = request.args.get("search")
+    sort_by = request.args.get("sort_by", "deleted_at")
+    order = request.args.get("order", "desc")
+
+    allowed_sort = {"created_at", "severity", "deleted_at", "title"}
+    if sort_by not in allowed_sort:
+        sort_by = "deleted_at"
+    order = "asc" if order == "asc" else "desc"
+
+    db = get_db()
+    try:
+        with db.cursor() as cursor:
+            query = """SELECT i.*, u.name as reporter_name
+                       FROM issues i
+                       LEFT JOIN users u ON i.user_id = u.id
+                       WHERE i.deleted_at IS NOT NULL"""
+
+            params = []
+            if category:
+                query += " AND i.category = %s"
+                params.append(category)
+            if severity:
+                query += " AND i.severity = %s"
+                params.append(severity)
+            if search:
+                query += " AND (i.title LIKE %s OR i.description LIKE %s)"
+                search_param = f"%{search}%"
+                params.extend([search_param, search_param])
+
+            query += f" ORDER BY i.{sort_by} {order}"
+            cursor.execute(query, params)
+            issues = cursor.fetchall()
+            return jsonify([serialize_issue(i) for i in issues]), 200
     finally:
         db.close()
 
@@ -406,5 +585,157 @@ def remove_upvote(issue_id):
             cursor.execute("SELECT COUNT(*) as cnt FROM issue_upvotes WHERE issue_id = %s", (issue_id,))
             count = cursor.fetchone()["cnt"]
             return jsonify({"upvote_count": count, "user_upvoted": False}), 200
+    finally:
+        db.close()
+
+
+@issues_bp.route("/feedback/my", methods=["GET"])
+@jwt_required()
+def get_my_feedback_items():
+    user_id = get_jwt_identity()
+    user = get_user(user_id)
+    if user["role"] != "citizen":
+        return jsonify({"error": "Citizen access required"}), 403
+
+    db = get_db()
+    try:
+        with db.cursor() as cursor:
+            cursor.execute(
+                """SELECT i.id, i.title, i.category, i.severity, i.status, i.updated_at,
+                          f.id AS feedback_id, f.is_satisfied, f.rating, f.comment, f.created_at AS feedback_at
+                   FROM issues i
+                   LEFT JOIN issue_feedback f ON f.issue_id = i.id AND f.user_id = %s
+                   WHERE i.user_id = %s
+                     AND i.deleted_at IS NULL
+                     AND i.status IN ('resolved', 'rejected')
+                   ORDER BY i.updated_at DESC""",
+                (user_id, user_id),
+            )
+            rows = cursor.fetchall()
+            for row in rows:
+                for dt_key in ["updated_at", "feedback_at"]:
+                    if row.get(dt_key) and hasattr(row[dt_key], "isoformat"):
+                        row[dt_key] = row[dt_key].isoformat()
+            return jsonify(rows), 200
+    finally:
+        db.close()
+
+
+@issues_bp.route("/<int:issue_id>/feedback", methods=["POST"])
+@jwt_required()
+def submit_feedback(issue_id):
+    user_id = get_jwt_identity()
+    user = get_user(user_id)
+    if user["role"] != "citizen":
+        return jsonify({"error": "Citizen access required"}), 403
+
+    data = request.get_json() or {}
+    is_satisfied = data.get("is_satisfied")
+    rating = data.get("rating")
+    comment = (data.get("comment") or "").strip()
+
+    if not isinstance(is_satisfied, bool):
+        return jsonify({"error": "is_satisfied must be true or false"}), 400
+    if rating is not None:
+        try:
+            rating = int(rating)
+        except Exception:
+            return jsonify({"error": "rating must be an integer between 1 and 5"}), 400
+        if rating < 1 or rating > 5:
+            return jsonify({"error": "rating must be an integer between 1 and 5"}), 400
+    if len(comment) > 1000:
+        return jsonify({"error": "comment must be at most 1000 characters"}), 400
+
+    db = get_db()
+    try:
+        with db.cursor() as cursor:
+            cursor.execute(
+                "SELECT id, status FROM issues WHERE id = %s AND user_id = %s AND deleted_at IS NULL",
+                (issue_id, user_id),
+            )
+            issue = cursor.fetchone()
+            if not issue:
+                return jsonify({"error": "Issue not found"}), 404
+            if issue["status"] not in {"resolved", "rejected"}:
+                return jsonify({"error": "Feedback can be submitted only for resolved/rejected issues"}), 400
+
+            cursor.execute(
+                """INSERT INTO issue_feedback (issue_id, user_id, is_satisfied, rating, comment)
+                   VALUES (%s, %s, %s, %s, %s)
+                   ON DUPLICATE KEY UPDATE
+                     is_satisfied = VALUES(is_satisfied),
+                     rating = VALUES(rating),
+                     comment = VALUES(comment),
+                     created_at = CURRENT_TIMESTAMP""",
+                (issue_id, user_id, is_satisfied, rating, comment or None),
+            )
+            feedback_note = "Citizen marked resolution as satisfactory" if is_satisfied else "Citizen marked resolution as unsatisfactory"
+            add_timeline(db, issue_id, feedback_note, user_id)
+            db.commit()
+            return jsonify({"message": "Feedback submitted successfully"}), 200
+    finally:
+        db.close()
+
+
+@issues_bp.route("/feedback/all", methods=["GET"])
+@jwt_required()
+def get_all_feedback():
+    user_id = get_jwt_identity()
+    user = get_user(user_id)
+    if user["role"] != "admin":
+        return jsonify({"error": "Admin access required"}), 403
+
+    search = (request.args.get("search") or "").strip()
+    status = (request.args.get("status") or "").strip()
+    is_satisfied = (request.args.get("is_satisfied") or "").strip().lower()
+
+    db = get_db()
+    try:
+        with db.cursor() as cursor:
+            query = """SELECT
+                         f.id AS feedback_id,
+                         f.issue_id,
+                         f.user_id,
+                         f.is_satisfied,
+                         f.rating,
+                         f.comment,
+                         f.created_at AS feedback_at,
+                         i.title AS issue_title,
+                         i.category,
+                         i.severity,
+                         i.status,
+                         i.updated_at AS issue_updated_at,
+                         u.name AS citizen_name,
+                         u.email AS citizen_email
+                       FROM issue_feedback f
+                       JOIN issues i ON i.id = f.issue_id
+                       JOIN users u ON u.id = f.user_id
+                       WHERE i.deleted_at IS NULL"""
+            params = []
+
+            if status:
+                query += " AND i.status = %s"
+                params.append(status)
+
+            if is_satisfied in {"true", "false"}:
+                query += " AND f.is_satisfied = %s"
+                params.append(1 if is_satisfied == "true" else 0)
+
+            if search:
+                query += " AND (i.title LIKE %s OR u.name LIKE %s OR u.email LIKE %s OR f.comment LIKE %s)"
+                like = f"%{search}%"
+                params.extend([like, like, like, like])
+
+            query += " ORDER BY f.created_at DESC"
+            cursor.execute(query, params)
+            rows = cursor.fetchall()
+
+            for row in rows:
+                for dt_key in ["feedback_at", "issue_updated_at"]:
+                    if row.get(dt_key) and hasattr(row[dt_key], "isoformat"):
+                        row[dt_key] = row[dt_key].isoformat()
+                row["is_satisfied"] = bool(row.get("is_satisfied"))
+
+            return jsonify(rows), 200
     finally:
         db.close()

@@ -19,7 +19,7 @@ function ClickHandler({ onLocationSelect }) {
   return null;
 }
 
-export function MapPicker({ lat, lng, onLocationSelect }) {
+export function MapPicker({ lat, lng, address, onLocationSelect }) {
   const defaultCenter = [20.5937, 78.9629]; // India center
 
   return (
@@ -43,9 +43,16 @@ export function MapPicker({ lat, lng, onLocationSelect }) {
         </MapContainer>
       </div>
       {lat && lng && (
-        <p className="text-xs text-slate-400 mt-1.5">
-          Selected: {parseFloat(lat).toFixed(6)}, {parseFloat(lng).toFixed(6)}
-        </p>
+        <div className="mt-2 space-y-1">
+          <p className="text-xs text-slate-400">
+            📍 Coordinates: {parseFloat(lat).toFixed(6)}, {parseFloat(lng).toFixed(6)}
+          </p>
+          {address && (
+            <p className="text-sm text-cyan-300 font-medium">
+              📮 {address}
+            </p>
+          )}
+        </div>
       )}
     </div>
   );

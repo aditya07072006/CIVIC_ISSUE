@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/Button";
 import { Input, Textarea, Select } from "../components/ui/Input";
 import { MapPicker } from "../components/map/MapPicker";
+import { reverseGeocode } from "../utils/geocoding";
 import { AlertTriangle, Upload, MapPin, Navigation, CheckCircle2, Zap } from "lucide-react";
 import api from "../api/axios";
 import toast from "react-hot-toast";
@@ -33,29 +34,41 @@ export default function ReportIssuePage() {
     severity: "medium",
     latitude: "",
     longitude: "",
+    address: "",
   });
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const handleLocationSelect = (lat, lng) => {
+  const handleLocationSelect = async (lat, lng) => {
     setForm((f) => ({ ...f, latitude: lat, longitude: lng }));
+    toast.loading("Fetching address details...", { id: "geo-addr" });
+    const addr = await reverseGeocode(lat, lng);
+    setForm((f) => ({ ...f, address: addr || "" }));
+    toast.dismiss("geo-addr");
   };
 
-  const handleGeolocate = () => {
+  const handleGeolocate = async () => {
     if (!navigator.geolocation) {
       toast.error("Geolocation is not supported by your browser");
       return;
     }
     toast.loading("Detecting your location...", { id: "geo" });
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
+      async (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
         setForm((f) => ({
           ...f,
-          latitude: pos.coords.latitude,
-          longitude: pos.coords.longitude,
+          latitude: lat,
+          longitude: lng,
         }));
-        toast.success("Location detected! Marker placed on map.", { id: "geo" });
+        toast.dismiss("geo");
+        toast.loading("Fetching address details...", { id: "geo-addr" });
+        const addr = await reverseGeocode(lat, lng);
+        setForm((f) => ({ ...f, address: addr || "" }));
+        toast.dismiss("geo-addr");
+        toast.success("Location detected! Address fetched. Marker placed on map.", { id: "geo" });
       },
       (err) => {
         const messages = {
@@ -259,7 +272,7 @@ export default function ReportIssuePage() {
                 Location set: {parseFloat(form.latitude).toFixed(5)}, {parseFloat(form.longitude).toFixed(5)}
               </div>
             )}
-            <MapPicker lat={form.latitude} lng={form.longitude} onLocationSelect={handleLocationSelect} />
+            <MapPicker lat={form.latitude} lng={form.longitude} address={form.address} onLocationSelect={handleLocationSelect} />
             {!form.latitude && (
               <p className="text-slate-500 text-xs flex items-center gap-1"><MapPin size={11} /> Click the map to pin the issue location</p>
             )}

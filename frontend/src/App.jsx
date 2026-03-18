@@ -7,7 +7,11 @@ import RegisterPage from "./pages/RegisterPage";
 import LandingPage from "./pages/LandingPage";
 import CitizenDashboard from "./pages/CitizenDashboard";
 import ReportIssuePage from "./pages/ReportIssuePage";
+import FeedbackPage from "./pages/FeedbackPage";
+import PublicIssuesPage from "./pages/PublicIssuesPage";
 import AdminDashboard from "./pages/AdminDashboard";
+import DeletedIssuesPage from "./pages/DeletedIssuesPage";
+import AdminFeedbackPage from "./pages/AdminFeedbackPage";
 
 function ProtectedRoute({ children, adminOnly = false }) {
   const { user } = useAuth();
@@ -44,10 +48,42 @@ function AppRoutes() {
         }
       />
       <Route
+        path="/feedback"
+        element={
+          <ProtectedRoute>
+            <AppLayout><FeedbackPage /></AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/public-issues"
+        element={
+          <ProtectedRoute>
+            <AppLayout><PublicIssuesPage /></AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/admin"
         element={
           <ProtectedRoute adminOnly>
             <AppLayout><AdminDashboard /></AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/deleted"
+        element={
+          <ProtectedRoute adminOnly>
+            <AppLayout><DeletedIssuesPage /></AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin-feedback"
+        element={
+          <ProtectedRoute adminOnly>
+            <AppLayout><AdminFeedbackPage /></AppLayout>
           </ProtectedRoute>
         }
       />

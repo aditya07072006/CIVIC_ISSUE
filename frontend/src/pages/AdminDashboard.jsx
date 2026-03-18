@@ -16,6 +16,7 @@ import {
   Trash2, Eye, Search, Map, List, Download,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { reverseGeocode } from "../utils/geocoding";
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, LineElement, PointElement, Filler);
 
@@ -135,7 +136,13 @@ export default function AdminDashboard() {
     setDetailLoading(true);
     try {
       const res = await api.get(`/issues/${id}`);
-      setDetail(res.data);
+      const issue = res.data;
+      if (!issue.address && issue.latitude && issue.longitude) {
+        const address = await reverseGeocode(issue.latitude, issue.longitude);
+        setDetail({ ...issue, address: address || "" });
+      } else {
+        setDetail(issue);
+      }
     } catch {
       toast.error("Failed to load details");
     } finally {
@@ -214,7 +221,6 @@ export default function AdminDashboard() {
       <div className="relative z-10 max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <p className="text-slate-500 text-sm mb-1">Municipal Management</p>
           <h1 className="text-2xl font-bold gradient-text">Admin Dashboard</h1>
         </div>
 
@@ -498,6 +504,21 @@ export default function AdminDashboard() {
                 </div>
               ))}
             </div>
+
+            {/* Location Details */}
+            {(detail.latitude && detail.longitude) && (
+              <div className="rounded-xl p-4" style={{background:"rgba(34,211,238,0.05)",border:"1px solid rgba(34,211,238,0.2)"}}>
+                <p className="text-slate-400 text-xs font-medium uppercase tracking-wide mb-2">📍 Location</p>
+                <div className="space-y-1">
+                  {detail.address && (
+                    <p className="text-slate-100 text-sm font-medium">{detail.address}</p>
+                  )}
+                  <p className="text-slate-400 text-xs">
+                    Coordinates: {parseFloat(detail.latitude).toFixed(6)}, {parseFloat(detail.longitude).toFixed(6)}
+                  </p>
+                </div>
+              </div>
+            )}
 
             {/* Admin Status Update */}
             <div>

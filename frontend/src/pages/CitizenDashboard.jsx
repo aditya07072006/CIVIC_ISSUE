@@ -9,6 +9,7 @@ import {
   AlertCircle, RefreshCcw, XCircle, Eye, ThumbsUp,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { reverseGeocode } from "../utils/geocoding";
 
 const STATUS_ICONS = {
   pending: <Clock size={14} className="text-yellow-400" />,
@@ -75,7 +76,13 @@ export default function CitizenDashboard() {
     setDetailLoading(true);
     try {
       const res = await api.get(`/issues/${id}`);
-      setDetail(res.data);
+      const issue = res.data;
+      if (!issue.address && issue.latitude && issue.longitude) {
+        const address = await reverseGeocode(issue.latitude, issue.longitude);
+        setDetail({ ...issue, address: address || "" });
+      } else {
+        setDetail(issue);
+      }
     } catch {
       toast.error("Failed to load issue details");
     } finally {
@@ -299,7 +306,6 @@ export default function CitizenDashboard() {
               {[
                 { label: "Category", value: detail.category.replace("_", " "), cap: true },
                 { label: "Reported", value: formatDate(detail.created_at) },
-                detail.latitude ? { label: "Coordinates", value: `${parseFloat(detail.latitude).toFixed(5)}, ${parseFloat(detail.longitude).toFixed(5)}`, small: true } : null,
                 { label: "SLA", value: `${detail.sla_hours}h expected` },
               ].filter(Boolean).map((item) => (
                 <div key={item.label} className="rounded-xl p-3"
@@ -309,6 +315,21 @@ export default function CitizenDashboard() {
                 </div>
               ))}
             </div>
+
+            {/* Location Details */}
+            {(detail.latitude && detail.longitude) && (
+              <div className="rounded-xl p-4" style={{background:"rgba(34,211,238,0.05)",border:"1px solid rgba(34,211,238,0.2)"}}>
+                <p className="text-slate-400 text-xs font-medium uppercase tracking-wide mb-2">📍 Location</p>
+                <div className="space-y-1">
+                  {detail.address && (
+                    <p className="text-slate-100 text-sm font-medium">{detail.address}</p>
+                  )}
+                  <p className="text-slate-400 text-xs">
+                    Coordinates: {parseFloat(detail.latitude).toFixed(6)}, {parseFloat(detail.longitude).toFixed(6)}
+                  </p>
+                </div>
+              </div>
+            )}
             {detail.timeline?.length > 0 && (
               <div>
                 <h4 className="text-sm font-semibold text-slate-300 mb-3">Activity Timeline</h4>

@@ -19,10 +19,12 @@ CREATE TABLE IF NOT EXISTS issues (
     latitude DECIMAL(10, 8),
     longitude DECIMAL(11, 8),
     image VARCHAR(500),
+    address VARCHAR(500),
     status ENUM('pending', 'in_progress', 'resolved', 'rejected') DEFAULT 'pending',
     priority ENUM('low', 'normal', 'high', 'emergency') DEFAULT 'normal',
     sla_hours INT DEFAULT 48,
     user_id INT NOT NULL,
+    deleted_at TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -36,6 +38,19 @@ CREATE TABLE IF NOT EXISTS issue_timeline (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (issue_id) REFERENCES issues(id) ON DELETE CASCADE,
     FOREIGN KEY (performed_by) REFERENCES users(id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS issue_feedback (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    issue_id INT NOT NULL,
+    user_id INT NOT NULL,
+    is_satisfied BOOLEAN NOT NULL,
+    rating TINYINT NULL,
+    comment TEXT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uniq_issue_user_feedback (issue_id, user_id),
+    FOREIGN KEY (issue_id) REFERENCES issues(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- Default admin user (password: Admin@123)

@@ -2,16 +2,20 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import {
   Activity, LayoutDashboard, Plus, ShieldCheck, LogOut,
-  X, Map, BarChart2, FileText, ChevronLeft, ChevronRight,
+  X, Map, BarChart2, FileText, MessageSquare, Globe2, ChevronLeft, ChevronRight,
 } from "lucide-react";
 
 const citizenLinks = [
   { to: "/dashboard", label: "My Issues", icon: LayoutDashboard },
+  { to: "/public-issues", label: "Public Issues", icon: Globe2 },
+  { to: "/feedback", label: "Feedback", icon: MessageSquare },
   { to: "/report",    label: "Report Issue", icon: Plus },
 ];
 
 const adminLinks = [
   { to: "/admin", label: "Dashboard", icon: ShieldCheck },
+  { to: "/admin-feedback", label: "Feedback", icon: MessageSquare },
+  { to: "/deleted", label: "Deleted Issues", icon: FileText },
 ];
 
 export function Sidebar({ open, collapsed, onClose, onToggleCollapse }) {
