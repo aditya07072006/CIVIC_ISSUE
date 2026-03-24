@@ -105,33 +105,33 @@ export default function AdminFeedbackPage() {
   };
 
   return (
-    <div className="min-h-screen p-4 md:p-8" style={{ background: "#050b14" }}>
+    <div className="animated-bg min-h-screen p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Citizen Feedback</h1>
-          <p className="text-slate-400">Review how citizens rated issue resolution quality.</p>
+          <h1 className="text-3xl md:text-4xl font-bold text-slate-800 mb-2">Citizen Feedback</h1>
+          <p className="text-slate-600">Review how citizens rated issue resolution quality.</p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <div className="rounded-2xl p-4 border border-cyan-500/30 bg-cyan-500/10">
-            <p className="text-xs text-cyan-200/80 mb-1">Total Feedback</p>
-            <p className="text-2xl font-bold text-cyan-200">{totalFeedback}</p>
+          <div className="glass-strong rounded-2xl p-4 border border-blue-700/20">
+            <p className="text-xs text-slate-600 mb-1">Total Feedback</p>
+            <p className="text-2xl font-bold text-blue-700">{totalFeedback}</p>
           </div>
-          <div className="rounded-2xl p-4 border border-emerald-500/30 bg-emerald-500/10">
-            <p className="text-xs text-emerald-200/80 mb-1">Satisfaction Rate</p>
-            <p className="text-2xl font-bold text-emerald-200">{satisfactionRate}%</p>
+          <div className="glass-strong rounded-2xl p-4 border border-emerald-500/25">
+            <p className="text-xs text-slate-600 mb-1">Satisfaction Rate</p>
+            <p className="text-2xl font-bold text-emerald-600">{satisfactionRate}%</p>
           </div>
-          <div className="rounded-2xl p-4 border border-amber-500/30 bg-amber-500/10">
-            <p className="text-xs text-amber-200/80 mb-1">Average Rating</p>
-            <p className="text-2xl font-bold text-amber-200">{averageRating}</p>
+          <div className="glass-strong rounded-2xl p-4 border border-amber-500/25">
+            <p className="text-xs text-slate-600 mb-1">Average Rating</p>
+            <p className="text-2xl font-bold text-amber-600">{averageRating}</p>
           </div>
-          <div className="rounded-2xl p-4 border border-red-500/30 bg-red-500/10">
-            <p className="text-xs text-red-200/80 mb-1">Not Satisfied</p>
-            <p className="text-2xl font-bold text-red-200">{unsatisfiedCount}</p>
+          <div className="glass-strong rounded-2xl p-4 border border-red-500/25">
+            <p className="text-xs text-slate-600 mb-1">Not Satisfied</p>
+            <p className="text-2xl font-bold text-red-600">{unsatisfiedCount}</p>
           </div>
         </div>
 
-        <div className="bg-slate-900/40 border border-slate-700/50 rounded-2xl p-6 mb-6 backdrop-blur-xl">
+        <div className="glass-strong border border-slate-300/80 rounded-2xl p-6 mb-6 backdrop-blur-xl">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="relative md:col-span-2">
               <Search size={18} className="absolute left-4 top-3.5 text-slate-500" />
@@ -139,14 +139,14 @@ export default function AdminFeedbackPage() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search by issue, citizen, email or comment"
-                className="w-full bg-slate-800/50 border border-slate-600/50 rounded-xl pl-11 pr-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+                className="w-full bg-white border border-slate-300 rounded-xl pl-11 pr-4 py-2.5 text-slate-800 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-700/25"
               />
             </div>
 
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value)}
-              className="bg-slate-800/50 border border-slate-600/50 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+              className="bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-700/25"
             >
               <option value="">All Issue Status</option>
               <option value="resolved">Resolved</option>
@@ -156,7 +156,7 @@ export default function AdminFeedbackPage() {
             <select
               value={satisfaction}
               onChange={(e) => setSatisfaction(e.target.value)}
-              className="bg-slate-800/50 border border-slate-600/50 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+              className="bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-700/25"
             >
               <option value="">All Feedback</option>
               <option value="true">Satisfied</option>
@@ -168,7 +168,7 @@ export default function AdminFeedbackPage() {
             <button
               type="button"
               onClick={fetchFeedback}
-              className="flex items-center gap-2 px-4 py-2 bg-cyan-500/20 border border-cyan-500/50 text-cyan-300 rounded-xl hover:bg-cyan-500/30 transition-all duration-200"
+              className="flex items-center gap-2 px-4 py-2 bg-blue-700/10 border border-blue-700/30 text-blue-700 rounded-xl hover:bg-blue-700/15 transition-all duration-200"
             >
               <Search size={16} /> Apply Filters
             </button>
@@ -176,33 +176,33 @@ export default function AdminFeedbackPage() {
               type="button"
               onClick={exportCsv}
               disabled={rows.length === 0}
-              className="flex items-center gap-2 px-4 py-2 bg-green-500/20 border border-green-500/50 text-green-300 rounded-xl hover:bg-green-500/30 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/35 text-emerald-700 rounded-xl hover:bg-emerald-500/15 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Download size={16} /> Export CSV
             </button>
           </div>
         </div>
 
-        <div className="text-slate-400 text-sm mb-4">{rows.length} feedback entries found</div>
+        <div className="text-slate-600 text-sm mb-4">{rows.length} feedback entries found</div>
 
         {loading ? (
-          <div className="text-center py-12 text-slate-400">Loading feedback...</div>
+          <div className="text-center py-12 text-slate-600">Loading feedback...</div>
         ) : rows.length === 0 ? (
-          <div className="bg-slate-900/40 border border-slate-700/50 rounded-2xl p-8 text-center text-slate-400">
+          <div className="glass-strong border border-slate-300/80 rounded-2xl p-8 text-center text-slate-600">
             No feedback found.
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-2xl border border-slate-700/50 backdrop-blur-xl">
+          <div className="overflow-x-auto rounded-2xl border border-slate-300/80 bg-white/95 backdrop-blur-xl">
             <table className="w-full">
               <thead>
-                <tr style={{ borderBottom: "1px solid rgba(100,116,139,0.3)", background: "rgba(51,65,85,0.5)" }}>
-                  <th className="px-5 py-4 text-left text-sm font-semibold text-slate-300">Issue</th>
-                  <th className="px-5 py-4 text-left text-sm font-semibold text-slate-300">Citizen</th>
-                  <th className="px-5 py-4 text-left text-sm font-semibold text-slate-300">Status</th>
-                  <th className="px-5 py-4 text-left text-sm font-semibold text-slate-300">Satisfaction</th>
-                  <th className="px-5 py-4 text-left text-sm font-semibold text-slate-300">Rating</th>
-                  <th className="px-5 py-4 text-left text-sm font-semibold text-slate-300">Comment</th>
-                  <th className="px-5 py-4 text-left text-sm font-semibold text-slate-300">Submitted</th>
+                <tr style={{ borderBottom: "1px solid rgba(15,61,145,0.18)", background: "rgba(241,245,249,0.9)" }}>
+                  <th className="px-5 py-4 text-left text-sm font-semibold text-slate-700">Issue</th>
+                  <th className="px-5 py-4 text-left text-sm font-semibold text-slate-700">Citizen</th>
+                  <th className="px-5 py-4 text-left text-sm font-semibold text-slate-700">Status</th>
+                  <th className="px-5 py-4 text-left text-sm font-semibold text-slate-700">Satisfaction</th>
+                  <th className="px-5 py-4 text-left text-sm font-semibold text-slate-700">Rating</th>
+                  <th className="px-5 py-4 text-left text-sm font-semibold text-slate-700">Comment</th>
+                  <th className="px-5 py-4 text-left text-sm font-semibold text-slate-700">Submitted</th>
                 </tr>
               </thead>
               <tbody>
@@ -210,33 +210,33 @@ export default function AdminFeedbackPage() {
                   <tr
                     key={r.feedback_id}
                     style={{
-                      borderBottom: idx < rows.length - 1 ? "1px solid rgba(100,116,139,0.2)" : "none",
-                      background: idx % 2 === 0 ? "transparent" : "rgba(30,41,59,0.2)",
+                      borderBottom: idx < rows.length - 1 ? "1px solid rgba(15,61,145,0.12)" : "none",
+                      background: idx % 2 === 0 ? "transparent" : "rgba(241,245,249,0.6)",
                     }}
                   >
-                    <td className="px-5 py-4 text-sm text-slate-200">
+                    <td className="px-5 py-4 text-sm text-slate-800">
                       <p className="font-medium">#{r.issue_id} {r.issue_title}</p>
-                      <p className="text-xs text-slate-500">{CATEGORY_LABELS[r.category] || r.category} • {r.severity}</p>
+                      <p className="text-xs text-slate-600">{CATEGORY_LABELS[r.category] || r.category} • {r.severity}</p>
                     </td>
-                    <td className="px-5 py-4 text-sm text-slate-300">
+                    <td className="px-5 py-4 text-sm text-slate-700">
                       <p>{r.citizen_name}</p>
-                      <p className="text-xs text-slate-500">{r.citizen_email}</p>
+                      <p className="text-xs text-slate-600">{r.citizen_email}</p>
                     </td>
-                    <td className="px-5 py-4 text-sm text-slate-300 capitalize">{r.status.replace("_", " ")}</td>
+                    <td className="px-5 py-4 text-sm text-slate-700 capitalize">{r.status.replace("_", " ")}</td>
                     <td className="px-5 py-4 text-sm">
                       {r.is_satisfied ? (
-                        <span className="inline-flex items-center gap-1 text-emerald-300"><ThumbsUp size={14} /> Satisfied</span>
+                        <span className="inline-flex items-center gap-1 text-emerald-600"><ThumbsUp size={14} /> Satisfied</span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 text-red-300"><ThumbsDown size={14} /> Not Satisfied</span>
+                        <span className="inline-flex items-center gap-1 text-red-600"><ThumbsDown size={14} /> Not Satisfied</span>
                       )}
                     </td>
-                    <td className="px-5 py-4 text-sm text-amber-300">{r.rating ? `${r.rating}/5` : "-"}</td>
-                    <td className="px-5 py-4 text-sm text-slate-300">
+                    <td className="px-5 py-4 text-sm text-amber-700">{r.rating ? `${r.rating}/5` : "-"}</td>
+                    <td className="px-5 py-4 text-sm text-slate-700">
                       <div className="max-w-sm truncate" title={r.comment || ""}>
                         {r.comment || <span className="text-slate-500">No comment</span>}
                       </div>
                     </td>
-                    <td className="px-5 py-4 text-sm text-slate-400">{formatDate(r.feedback_at)}</td>
+                    <td className="px-5 py-4 text-sm text-slate-600">{formatDate(r.feedback_at)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -244,7 +244,7 @@ export default function AdminFeedbackPage() {
           </div>
         )}
 
-        <div className="mt-6 text-xs text-slate-500 flex items-center gap-2">
+        <div className="mt-6 text-xs text-slate-600 flex items-center gap-2">
           <MessageSquare size={14} /> Admin feedback monitor helps identify poor resolution quality quickly.
         </div>
       </div>

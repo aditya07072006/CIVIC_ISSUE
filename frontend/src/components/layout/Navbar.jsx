@@ -29,10 +29,10 @@ export function Navbar() {
     <nav
       className="sticky top-0 z-40"
       style={{
-        background: "rgba(5,11,20,0.85)",
+        background: "rgba(255,255,255,0.94)",
         backdropFilter: "blur(20px)",
         WebkitBackdropFilter: "blur(20px)",
-        borderBottom: "1px solid rgba(255,255,255,0.06)",
+        borderBottom: "1px solid rgba(15,61,145,0.12)",
       }}
     >
       <div className="max-w-7xl mx-auto px-4 flex items-center justify-between h-16">
@@ -40,11 +40,11 @@ export function Navbar() {
         <Link to="/" className="flex items-center gap-2.5 group">
           <div className="relative">
             <div className="w-8 h-8 rounded-xl flex items-center justify-center"
-              style={{ background: "linear-gradient(135deg, #22d3ee, #a855f7)" }}>
+              style={{ background: "linear-gradient(135deg, #0f3d91, #1c5bbf)" }}>
               <Activity size={16} className="text-white" />
             </div>
             <div className="absolute inset-0 rounded-xl blur-md opacity-0 group-hover:opacity-60 transition-opacity"
-              style={{ background: "linear-gradient(135deg, #22d3ee, #a855f7)" }} />
+              style={{ background: "linear-gradient(135deg, #0f3d91, #1c5bbf)" }} />
           </div>
           <span className="font-bold text-base gradient-text hidden sm:block">CivicPortal</span>
         </Link>
@@ -60,11 +60,11 @@ export function Navbar() {
                 className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                   active
                     ? "text-white"
-                    : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
+                    : "text-slate-600 hover:text-slate-800 hover:bg-slate-100"
                 }`}
                 style={active ? {
-                  background: "linear-gradient(135deg, rgba(34,211,238,0.15), rgba(168,85,247,0.15))",
-                  border: "1px solid rgba(34,211,238,0.2)",
+                  background: "linear-gradient(135deg, rgba(15,61,145,0.92), rgba(28,91,191,0.92))",
+                  border: "1px solid rgba(15,61,145,0.35)",
                 } : {}}
               >
                 {l.icon}
@@ -77,22 +77,22 @@ export function Navbar() {
         {/* User + Logout */}
         <div className="hidden md:flex items-center gap-3">
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl"
-            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+            style={{ background: "rgba(15,61,145,0.06)", border: "1px solid rgba(15,61,145,0.14)" }}>
             <div className="w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold"
-              style={{ background: "linear-gradient(135deg, #22d3ee, #a855f7)" }}>
+              style={{ background: "linear-gradient(135deg, #0f3d91, #1c5bbf)" }}>
               {user?.name?.[0]?.toUpperCase()}
             </div>
-            <span className="text-sm text-slate-300">{user?.name}</span>
+            <span className="text-sm text-slate-700">{user?.name}</span>
             {user?.role === "admin" && (
               <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md"
-                style={{ background: "rgba(168,85,247,0.2)", color: "#c084fc", border: "1px solid rgba(168,85,247,0.3)" }}>
+                style={{ background: "rgba(15,61,145,0.12)", color: "#0f3d91", border: "1px solid rgba(15,61,145,0.24)" }}>
                 ADMIN
               </span>
             )}
           </div>
           <button
             onClick={handleLogout}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all duration-200"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm text-slate-600 hover:text-red-600 hover:bg-red-50 transition-all duration-200"
           >
             <LogOut size={14} />
             <span>Logout</span>
@@ -101,7 +101,7 @@ export function Navbar() {
 
         {/* Mobile toggle */}
         <button
-          className="md:hidden text-slate-400 hover:text-slate-200 p-2 rounded-lg hover:bg-white/5 transition-colors"
+          className="md:hidden text-slate-600 hover:text-slate-800 p-2 rounded-lg hover:bg-slate-100 transition-colors"
           onClick={() => setMobileOpen((v) => !v)}
         >
           {mobileOpen ? <X size={20} /> : <Menu size={20} />}
@@ -111,7 +111,7 @@ export function Navbar() {
       {/* Mobile Menu */}
       {mobileOpen && (
         <div className="md:hidden px-4 py-3 flex flex-col gap-1"
-          style={{ borderTop: "1px solid rgba(255,255,255,0.06)", background: "rgba(5,11,20,0.95)" }}>
+          style={{ borderTop: "1px solid rgba(15,61,145,0.12)", background: "rgba(255,255,255,0.98)" }}>
           {links.map((l) => (
             <Link
               key={l.to}
@@ -120,11 +120,11 @@ export function Navbar() {
               className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
                 location.pathname === l.to
                   ? "text-white"
-                  : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
+                  : "text-slate-600 hover:text-slate-800 hover:bg-slate-100"
               }`}
               style={location.pathname === l.to ? {
-                background: "linear-gradient(135deg, rgba(34,211,238,0.1), rgba(168,85,247,0.1))",
-                border: "1px solid rgba(34,211,238,0.15)",
+                background: "linear-gradient(135deg, rgba(15,61,145,0.92), rgba(28,91,191,0.92))",
+                border: "1px solid rgba(15,61,145,0.35)",
               } : {}}
             >
               {l.icon}

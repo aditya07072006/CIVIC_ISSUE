@@ -23,7 +23,7 @@ export function AppLayout({ children }) {
   };
 
   return (
-    <div className="min-h-screen" style={{ background: "#050b14" }}>
+    <div className="min-h-screen" style={{ background: "#f3f6fb" }}>
       {/* ── Sidebar (fixed) ── */}
       <Sidebar
         open={sidebarOpen}

@@ -52,8 +52,8 @@ export function Sidebar({ open, collapsed, onClose, onToggleCollapse }) {
         className="fixed top-0 left-0 h-full z-50 flex flex-col transition-all duration-300 ease-in-out"
         style={{
           width: collapsed ? "72px" : "240px",
-          background: "rgba(5,11,20,0.97)",
-          borderRight: "1px solid rgba(255,255,255,0.07)",
+          background: "rgba(255,255,255,0.98)",
+          borderRight: "1px solid rgba(15,61,145,0.14)",
           backdropFilter: "blur(24px)",
           transform: open || window.innerWidth >= 768 ? "translateX(0)" : "translateX(-100%)",
           // On mobile: controlled by `open`, on desktop always visible
@@ -62,11 +62,11 @@ export function Sidebar({ open, collapsed, onClose, onToggleCollapse }) {
         {/* ── Logo ── */}
         <div
           className="flex items-center gap-3 px-4 py-5"
-          style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+          style={{ borderBottom: "1px solid rgba(15,61,145,0.12)" }}
         >
           <div
             className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-            style={{ background: "linear-gradient(135deg,#22d3ee,#a855f7)" }}
+            style={{ background: "linear-gradient(135deg,#0f3d91,#1c5bbf)" }}
           >
             <Activity size={18} className="text-white" />
           </div>
@@ -79,7 +79,7 @@ export function Sidebar({ open, collapsed, onClose, onToggleCollapse }) {
           {/* Close button – mobile only */}
           <button
             onClick={onClose}
-            className="ml-auto text-slate-500 hover:text-slate-200 transition-colors md:hidden"
+            className="ml-auto text-slate-500 hover:text-slate-700 transition-colors md:hidden"
           >
             <X size={18} />
           </button>
@@ -100,14 +100,14 @@ export function Sidebar({ open, collapsed, onClose, onToggleCollapse }) {
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group relative ${
                   active
                     ? "text-white"
-                    : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
+                    : "text-slate-600 hover:text-slate-800 hover:bg-slate-100"
                 }`}
                 style={
                   active
                     ? {
                         background:
-                          "linear-gradient(135deg,rgba(34,211,238,0.15),rgba(168,85,247,0.15))",
-                        border: "1px solid rgba(34,211,238,0.2)",
+                          "linear-gradient(135deg,rgba(15,61,145,0.92),rgba(28,91,191,0.92))",
+                        border: "1px solid rgba(15,61,145,0.35)",
                       }
                     : {}
                 }
@@ -119,7 +119,7 @@ export function Sidebar({ open, collapsed, onClose, onToggleCollapse }) {
                 {collapsed && (
                   <span
                     className="absolute left-full ml-3 px-2 py-1 rounded-lg text-xs text-white whitespace-nowrap pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity z-50"
-                    style={{ background: "rgba(30,40,60,0.95)", border: "1px solid rgba(255,255,255,0.1)" }}
+                    style={{ background: "rgba(15,61,145,0.95)", border: "1px solid rgba(15,61,145,0.3)" }}
                   >
                     {label}
                   </span>
@@ -132,23 +132,23 @@ export function Sidebar({ open, collapsed, onClose, onToggleCollapse }) {
         {/* ── User + Logout ── */}
         <div
           className="px-2 py-4 flex flex-col gap-2"
-          style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
+          style={{ borderTop: "1px solid rgba(15,61,145,0.12)" }}
         >
           {/* User info */}
           <div
             className="flex items-center gap-3 px-3 py-2 rounded-xl overflow-hidden"
-            style={{ background: "rgba(255,255,255,0.04)" }}
+            style={{ background: "rgba(15,61,145,0.06)", border: "1px solid rgba(15,61,145,0.14)" }}
           >
             <div
               className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold shrink-0"
-              style={{ background: "linear-gradient(135deg,#22d3ee,#a855f7)" }}
+              style={{ background: "linear-gradient(135deg,#0f3d91,#1c5bbf)" }}
             >
               {initials}
             </div>
             {!collapsed && (
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-slate-200 font-medium truncate">{user?.name}</p>
-                <p className="text-xs text-slate-500 truncate">{user?.email}</p>
+                <p className="text-sm text-slate-800 font-medium truncate">{user?.name}</p>
+                <p className="text-xs text-slate-600 truncate">{user?.email}</p>
               </div>
             )}
           </div>
@@ -157,14 +157,14 @@ export function Sidebar({ open, collapsed, onClose, onToggleCollapse }) {
           <button
             onClick={handleLogout}
             title={collapsed ? "Logout" : undefined}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all duration-200 group relative"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-slate-600 hover:text-red-600 hover:bg-red-50 transition-all duration-200 group relative"
           >
             <LogOut size={18} className="shrink-0" />
             {!collapsed && <span>Logout</span>}
             {collapsed && (
               <span
                 className="absolute left-full ml-3 px-2 py-1 rounded-lg text-xs text-white whitespace-nowrap pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity z-50"
-                style={{ background: "rgba(30,40,60,0.95)", border: "1px solid rgba(255,255,255,0.1)" }}
+                style={{ background: "rgba(15,61,145,0.95)", border: "1px solid rgba(15,61,145,0.3)" }}
               >
                 Logout
               </span>
@@ -175,10 +175,10 @@ export function Sidebar({ open, collapsed, onClose, onToggleCollapse }) {
         {/* ── Collapse toggle (desktop only) ── */}
         <button
           onClick={onToggleCollapse}
-          className="hidden md:flex absolute -right-3 top-20 w-6 h-6 rounded-full items-center justify-center text-slate-400 hover:text-white transition-colors"
+          className="hidden md:flex absolute -right-3 top-20 w-6 h-6 rounded-full items-center justify-center text-slate-600 hover:text-white transition-colors"
           style={{
-            background: "rgba(30,40,60,0.95)",
-            border: "1px solid rgba(255,255,255,0.12)",
+            background: "rgba(255,255,255,0.98)",
+            border: "1px solid rgba(15,61,145,0.22)",
           }}
         >
           {collapsed ? <ChevronRight size={12} /> : <ChevronLeft size={12} />}

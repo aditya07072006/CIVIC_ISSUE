@@ -114,21 +114,21 @@ export default function CitizenDashboard() {
     <div className="animated-bg min-h-screen relative">
       {/* Ambient orbs */}
       <div className="pointer-events-none fixed inset-0 z-0" aria-hidden>
-        <div style={{position:"absolute",top:"5%",right:"10%",width:350,height:350,borderRadius:"50%",background:"radial-gradient(circle,rgba(34,211,238,0.06) 0%,transparent 70%)"}} />
-        <div style={{position:"absolute",bottom:"20%",left:"5%",width:280,height:280,borderRadius:"50%",background:"radial-gradient(circle,rgba(168,85,247,0.06) 0%,transparent 70%)"}} />
+        <div style={{position:"absolute",top:"5%",right:"10%",width:350,height:350,borderRadius:"50%",background:"radial-gradient(circle,rgba(15,61,145,0.08) 0%,transparent 70%)"}} />
+        <div style={{position:"absolute",bottom:"20%",left:"5%",width:280,height:280,borderRadius:"50%",background:"radial-gradient(circle,rgba(245,158,11,0.08) 0%,transparent 70%)"}} />
       </div>
 
       <div className="relative z-10 max-w-5xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <p className="text-slate-400 text-sm mb-1">Welcome back</p>
+            <p className="text-slate-600 text-sm mb-1">Welcome back</p>
             <h1 className="text-2xl font-bold gradient-text">{user?.name}</h1>
           </div>
           <Link to="/report">
             <button
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm text-white transition-all hover:scale-105"
-              style={{background:"linear-gradient(135deg,#22d3ee,#a855f7)",boxShadow:"0 0 24px rgba(34,211,238,0.3)"}}>
+              style={{background:"linear-gradient(135deg,#0f3d91,#1c5bbf)",boxShadow:"0 0 24px rgba(15,61,145,0.28)"}}>
               <Plus size={16} /> Report Issue
             </button>
           </Link>
@@ -140,7 +140,7 @@ export default function CitizenDashboard() {
             <div key={s.label} className="glass-strong rounded-2xl p-5 text-center"
               style={{border:`1px solid ${s.border}`}}>
               <p className="text-3xl font-black mb-1" style={{color:s.color}}>{s.value}</p>
-              <p className="text-slate-400 text-xs font-medium">{s.label}</p>
+              <p className="text-slate-600 text-xs font-medium">{s.label}</p>
             </div>
           ))}
         </div>
@@ -154,26 +154,26 @@ export default function CitizenDashboard() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && fetchIssues()}
-              className="w-full pl-9 pr-4 py-2 rounded-xl text-sm text-slate-200 placeholder-slate-500 outline-none transition-all"
-              style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)"}}
+              className="w-full pl-9 pr-4 py-2 rounded-xl text-sm text-slate-700 placeholder-slate-500 outline-none transition-all"
+              style={{background:"rgba(255,255,255,0.96)",border:"1px solid rgba(15,61,145,0.2)"}}
             />
           </div>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 rounded-xl text-sm text-slate-300 outline-none"
-            style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)"}}
+            className="px-3 py-2 rounded-xl text-sm text-slate-700 outline-none"
+            style={{background:"rgba(255,255,255,0.96)",border:"1px solid rgba(15,61,145,0.2)"}}
           >
-            <option value="" style={{background:"#0f172a"}}>All Status</option>
-            <option value="pending" style={{background:"#0f172a"}}>Pending</option>
-            <option value="in_progress" style={{background:"#0f172a"}}>In Progress</option>
-            <option value="resolved" style={{background:"#0f172a"}}>Resolved</option>
-            <option value="rejected" style={{background:"#0f172a"}}>Rejected</option>
+            <option value="" style={{background:"#ffffff",color:"#0f172a"}}>All Status</option>
+            <option value="pending" style={{background:"#ffffff",color:"#0f172a"}}>Pending</option>
+            <option value="in_progress" style={{background:"#ffffff",color:"#0f172a"}}>In Progress</option>
+            <option value="resolved" style={{background:"#ffffff",color:"#0f172a"}}>Resolved</option>
+            <option value="rejected" style={{background:"#ffffff",color:"#0f172a"}}>Rejected</option>
           </select>
           <button
             onClick={fetchIssues}
-            className="px-4 py-2 rounded-xl text-sm font-medium text-cyan-400 transition-all hover:text-white"
-            style={{background:"rgba(34,211,238,0.08)",border:"1px solid rgba(34,211,238,0.2)"}}>
+            className="px-4 py-2 rounded-xl text-sm font-medium text-blue-700 transition-all hover:text-blue-900"
+            style={{background:"rgba(15,61,145,0.1)",border:"1px solid rgba(15,61,145,0.2)"}}>
             <RefreshCcw size={14} />
           </button>
         </div>
@@ -181,7 +181,7 @@ export default function CitizenDashboard() {
         {/* Issues List */}
         {loading ? (
           <div className="text-center py-20 text-slate-500">
-            <div className="w-8 h-8 border-2 border-cyan-500/30 border-t-cyan-400 rounded-full animate-spin mx-auto mb-4" />
+            <div className="w-8 h-8 border-2 border-blue-700/20 border-t-blue-700 rounded-full animate-spin mx-auto mb-4" />
             Loading issues…
           </div>
         ) : filtered.length === 0 ? (
@@ -190,7 +190,7 @@ export default function CitizenDashboard() {
             <p className="text-slate-400 mb-5">No issues found</p>
             <Link to="/report">
               <button className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl font-semibold text-sm text-white"
-                style={{background:"linear-gradient(135deg,#22d3ee,#a855f7)"}}>
+                style={{background:"linear-gradient(135deg,#0f3d91,#1c5bbf)"}}>
                 <Plus size={15} /> Report Your First Issue
               </button>
             </Link>
@@ -203,7 +203,7 @@ export default function CitizenDashboard() {
                 <div
                   key={issue.id}
                   className="glass rounded-2xl cursor-pointer transition-all hover:scale-[1.01] overflow-hidden"
-                  style={{border:"1px solid rgba(255,255,255,0.07)",borderLeft:`3px solid ${sevColor}`}}
+                  style={{border:"1px solid rgba(15,61,145,0.14)",borderLeft:`3px solid ${sevColor}`}}
                   onClick={() => openDetail(issue.id)}
                 >
                   <div className="p-4 flex items-start gap-4">
@@ -212,13 +212,13 @@ export default function CitizenDashboard() {
                         className="w-16 h-16 rounded-xl object-cover shrink-0 ring-1 ring-white/10" />
                     ) : (
                       <div className="w-16 h-16 rounded-xl shrink-0 flex items-center justify-center"
-                        style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.07)"}}>
+                        style={{background:"rgba(255,255,255,0.96)",border:"1px solid rgba(15,61,145,0.14)"}}>
                         <AlertCircle size={22} className="text-slate-600" />
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2 flex-wrap mb-1">
-                        <h3 className="font-semibold text-slate-100 text-sm">{issue.title}</h3>
+                        <h3 className="font-semibold text-slate-800 text-sm">{issue.title}</h3>
                         <div className="flex items-center gap-1.5 shrink-0">
                           <Badge variant={issue.severity}>{issue.severity}</Badge>
                           <Badge variant={issue.status}>
@@ -229,8 +229,8 @@ export default function CitizenDashboard() {
                           </Badge>
                         </div>
                       </div>
-                      <p className="text-slate-400 text-xs line-clamp-2 mb-2">{issue.description}</p>
-                      <div className="flex items-center gap-4 text-xs text-slate-500">
+                      <p className="text-slate-600 text-xs line-clamp-2 mb-2">{issue.description}</p>
+                      <div className="flex items-center gap-4 text-xs text-slate-600">
                         <span className="capitalize">{issue.category.replace("_", " ")}</span>
                         <span className="flex items-center gap-1">
                           <Clock size={10} /> {formatDate(issue.created_at)}
@@ -249,19 +249,19 @@ export default function CitizenDashboard() {
                         className="flex flex-col items-center gap-0.5 p-2 rounded-xl transition-all"
                         style={issue.user_upvoted
                           ? {background:"rgba(34,211,238,0.15)",color:"#22d3ee"}
-                          : {background:"rgba(255,255,255,0.04)",color:"#475569"}}
+                          : {background:"rgba(255,255,255,0.96)",border:"1px solid rgba(15,61,145,0.14)",color:"#475569"}}
                       >
                         <ThumbsUp size={14} className={issue.user_upvoted ? "fill-cyan-400" : ""} />
                         <span className="text-xs font-bold">{issue.upvote_count || 0}</span>
                       </button>
                       <div className="flex items-center justify-center w-8 h-8 rounded-xl"
-                        style={{background:"rgba(255,255,255,0.03)",color:"#475569"}}>
+                        style={{background:"rgba(255,255,255,0.96)",border:"1px solid rgba(15,61,145,0.12)",color:"#475569"}}>
                         <Eye size={13} />
                       </div>
                     </div>
                   </div>
                   {/* Status progress bar */}
-                  <div className="h-0.5 w-full" style={{background:"rgba(255,255,255,0.04)"}}>
+                  <div className="h-0.5 w-full" style={{background:"rgba(15,61,145,0.08)"}}>
                     <div className="h-full rounded-full transition-all"
                       style={{
                         width: issue.status === "resolved" ? "100%" : issue.status === "in_progress" ? "60%" : issue.status === "rejected" ? "100%" : "20%",
@@ -295,13 +295,13 @@ export default function CitizenDashboard() {
                 className="w-full rounded-xl max-h-64 object-cover ring-1 ring-white/10" />
             )}
             <div className="flex items-start justify-between gap-3 flex-wrap">
-              <h2 className="text-xl font-bold text-slate-100">{detail.title}</h2>
+              <h2 className="text-xl font-bold text-slate-800">{detail.title}</h2>
               <div className="flex gap-2">
                 <Badge variant={detail.severity}>{detail.severity}</Badge>
                 <Badge variant={detail.status}>{detail.status.replace("_", " ")}</Badge>
               </div>
             </div>
-            <p className="text-slate-300 text-sm leading-relaxed">{detail.description}</p>
+            <p className="text-slate-700 text-sm leading-relaxed">{detail.description}</p>
             <div className="grid grid-cols-2 gap-3 text-sm">
               {[
                 { label: "Category", value: detail.category.replace("_", " "), cap: true },
@@ -309,9 +309,9 @@ export default function CitizenDashboard() {
                 { label: "SLA", value: `${detail.sla_hours}h expected` },
               ].filter(Boolean).map((item) => (
                 <div key={item.label} className="rounded-xl p-3"
-                  style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.07)"}}>
+                  style={{background:"rgba(255,255,255,0.96)",border:"1px solid rgba(15,61,145,0.14)"}}>
                   <p className="text-slate-500 text-xs mb-0.5">{item.label}</p>
-                  <p className={`text-slate-200 font-medium ${item.small ? "text-xs" : ""} ${item.cap ? "capitalize" : ""}`}>{item.value}</p>
+                  <p className={`text-slate-700 font-medium ${item.small ? "text-xs" : ""} ${item.cap ? "capitalize" : ""}`}>{item.value}</p>
                 </div>
               ))}
             </div>
@@ -322,7 +322,7 @@ export default function CitizenDashboard() {
                 <p className="text-slate-400 text-xs font-medium uppercase tracking-wide mb-2">📍 Location</p>
                 <div className="space-y-1">
                   {detail.address && (
-                    <p className="text-slate-100 text-sm font-medium">{detail.address}</p>
+                    <p className="text-slate-800 text-sm font-medium">{detail.address}</p>
                   )}
                   <p className="text-slate-400 text-xs">
                     Coordinates: {parseFloat(detail.latitude).toFixed(6)}, {parseFloat(detail.longitude).toFixed(6)}
@@ -332,14 +332,14 @@ export default function CitizenDashboard() {
             )}
             {detail.timeline?.length > 0 && (
               <div>
-                <h4 className="text-sm font-semibold text-slate-300 mb-3">Activity Timeline</h4>
+                <h4 className="text-sm font-semibold text-slate-700 mb-3">Activity Timeline</h4>
                 <div className="flex flex-col gap-2">
                   {detail.timeline.map((t, i) => (
                     <div key={i} className="flex items-start gap-3">
                       <div className="w-2 h-2 rounded-full mt-1.5 shrink-0"
                         style={{background:"linear-gradient(135deg,#22d3ee,#a855f7)"}} />
                       <div>
-                        <p className="text-sm text-slate-300">{t.action}</p>
+                        <p className="text-sm text-slate-700">{t.action}</p>
                         <p className="text-xs text-slate-500">{formatDate(t.created_at)}</p>
                       </div>
                     </div>

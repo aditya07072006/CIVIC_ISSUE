@@ -2,11 +2,11 @@ import { cn } from "../../lib/utils";
 
 const variants = {
   default: "btn-gradient text-white shadow-lg",
-  outline: "border border-white/15 text-slate-300 hover:bg-white/5 hover:border-white/25 backdrop-blur-sm",
-  ghost: "text-slate-400 hover:text-slate-200 hover:bg-white/5",
+  outline: "border border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 backdrop-blur-sm",
+  ghost: "text-slate-600 hover:text-slate-800 hover:bg-slate-100",
   danger: "bg-red-500/90 hover:bg-red-500 text-white shadow-lg shadow-red-500/20",
   success: "bg-emerald-500/90 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-500/20",
-  secondary: "bg-white/8 hover:bg-white/12 text-slate-200 border border-white/10",
+  secondary: "bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300",
 };
 
 const sizes = {

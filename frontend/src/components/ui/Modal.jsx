@@ -25,14 +25,14 @@ export function Modal({ open, onClose, title, children, size = "md" }) {
     >
       <div
         className={`glass-strong rounded-2xl shadow-2xl w-full ${sizeMap[size]} max-h-[90vh] overflow-y-auto animate-fade-up`}
-        style={{ border: "1px solid rgba(255,255,255,0.1)" }}
+        style={{ border: "1px solid rgba(15,61,145,0.14)" }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
-          <h2 className="text-lg font-semibold text-slate-100">{title}</h2>
+        <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: "1px solid rgba(15,61,145,0.12)" }}>
+          <h2 className="text-lg font-semibold text-slate-800">{title}</h2>
           <button
             onClick={onClose}
-            className="text-slate-500 hover:text-slate-200 transition-colors p-1.5 rounded-lg hover:bg-white/10"
+            className="text-slate-500 hover:text-slate-700 transition-colors p-1.5 rounded-lg hover:bg-slate-100"
           >
             <X size={18} />
           </button>

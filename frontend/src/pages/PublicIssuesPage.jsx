@@ -121,65 +121,65 @@ export default function PublicIssuesPage() {
   }, [stats]);
 
   return (
-    <div className="min-h-screen relative overflow-hidden" style={{ background: "#050b14" }}>
+    <div className="animated-bg min-h-screen relative overflow-hidden">
       <div className="pointer-events-none fixed inset-0 z-0" aria-hidden>
-        <div style={{ position: "absolute", top: "5%", right: "8%", width: 340, height: 340, borderRadius: "50%", background: "radial-gradient(circle,rgba(34,211,238,0.07),transparent 70%)" }} />
-        <div style={{ position: "absolute", bottom: "12%", left: "6%", width: 300, height: 300, borderRadius: "50%", background: "radial-gradient(circle,rgba(168,85,247,0.08),transparent 70%)" }} />
+        <div style={{ position: "absolute", top: "5%", right: "8%", width: 340, height: 340, borderRadius: "50%", background: "radial-gradient(circle,rgba(15,61,145,0.08),transparent 70%)" }} />
+        <div style={{ position: "absolute", bottom: "12%", left: "6%", width: 300, height: 300, borderRadius: "50%", background: "radial-gradient(circle,rgba(245,158,11,0.08),transparent 70%)" }} />
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 py-8">
         <div className="mb-8 flex items-start justify-between gap-3 flex-wrap">
           <div>
-            <p className="text-cyan-300 text-xs font-semibold tracking-wide uppercase mb-2">Community Intelligence</p>
-            <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Public Issues & City Pulse</h1>
-            <p className="text-slate-400 text-sm md:text-base">Explore all city issues, resolution quality, and trends in one place.</p>
+            <p className="text-blue-700 text-xs font-semibold tracking-wide uppercase mb-2">Community Intelligence</p>
+            <h1 className="text-3xl md:text-4xl font-bold text-slate-800 mb-2">Public Issues & City Pulse</h1>
+            <p className="text-slate-600 text-sm md:text-base">Explore all city issues, resolution quality, and trends in one place.</p>
           </div>
           <button
             type="button"
             onClick={fetchData}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-cyan-300 border border-cyan-400/30 bg-cyan-500/10 hover:bg-cyan-500/20 transition-all"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-blue-700 border border-blue-700/30 bg-blue-700/10 hover:bg-blue-700/15 transition-all"
           >
             <RefreshCcw size={15} /> Refresh
           </button>
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-7">
-          <div className="rounded-2xl p-4 border border-cyan-500/30 bg-cyan-500/10">
-            <p className="text-xs text-cyan-100/80">Total Issues</p>
-            <p className="text-2xl font-bold text-cyan-100">{stats?.total ?? 0}</p>
+          <div className="glass-strong rounded-2xl p-4 border border-blue-700/20">
+            <p className="text-xs text-slate-600">Total Issues</p>
+            <p className="text-2xl font-bold text-blue-700">{stats?.total ?? 0}</p>
           </div>
-          <div className="rounded-2xl p-4 border border-emerald-500/30 bg-emerald-500/10">
-            <p className="text-xs text-emerald-100/80">Resolved</p>
-            <p className="text-2xl font-bold text-emerald-100">{stats?.resolved ?? 0}</p>
+          <div className="glass-strong rounded-2xl p-4 border border-emerald-500/25">
+            <p className="text-xs text-slate-600">Resolved</p>
+            <p className="text-2xl font-bold text-emerald-600">{stats?.resolved ?? 0}</p>
           </div>
-          <div className="rounded-2xl p-4 border border-amber-500/30 bg-amber-500/10">
-            <p className="text-xs text-amber-100/80">Unresolved</p>
-            <p className="text-2xl font-bold text-amber-100">{stats?.unresolved ?? 0}</p>
+          <div className="glass-strong rounded-2xl p-4 border border-amber-500/25">
+            <p className="text-xs text-slate-600">Unresolved</p>
+            <p className="text-2xl font-bold text-amber-600">{stats?.unresolved ?? 0}</p>
           </div>
-          <div className="rounded-2xl p-4 border border-violet-500/30 bg-violet-500/10">
-            <p className="text-xs text-violet-100/80">Avg Rating</p>
-            <p className="text-2xl font-bold text-violet-100">{stats?.avg_rating ?? 0}</p>
+          <div className="glass-strong rounded-2xl p-4 border border-purple-500/25">
+            <p className="text-xs text-slate-600">Avg Rating</p>
+            <p className="text-2xl font-bold text-purple-700">{stats?.avg_rating ?? 0}</p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 mb-7">
-          <div className="rounded-2xl p-4 border border-slate-700/50 bg-slate-900/45 backdrop-blur-xl">
-            <p className="text-sm font-semibold text-slate-200 mb-3">Resolution Split</p>
+          <div className="glass-strong rounded-2xl p-4 border border-slate-300/80 backdrop-blur-xl">
+            <p className="text-sm font-semibold text-slate-700 mb-3">Resolution Split</p>
             {resolvedVsUnresolved && <Doughnut data={resolvedVsUnresolved} />}
           </div>
-          <div className="rounded-2xl p-4 border border-slate-700/50 bg-slate-900/45 backdrop-blur-xl xl:col-span-2">
-            <p className="text-sm font-semibold text-slate-200 mb-3">Category Distribution</p>
+          <div className="glass-strong rounded-2xl p-4 border border-slate-300/80 backdrop-blur-xl xl:col-span-2">
+            <p className="text-sm font-semibold text-slate-700 mb-3">Category Distribution</p>
             {categoryChart && <Bar data={categoryChart} options={{ plugins: { legend: { display: false } } }} />}
           </div>
         </div>
 
-        <div className="rounded-2xl p-4 border border-slate-700/50 bg-slate-900/45 backdrop-blur-xl mb-7">
-          <p className="text-sm font-semibold text-slate-200 mb-3">Severity Breakdown</p>
+        <div className="glass-strong rounded-2xl p-4 border border-slate-300/80 backdrop-blur-xl mb-7">
+          <p className="text-sm font-semibold text-slate-700 mb-3">Severity Breakdown</p>
           {severityChart && <Bar data={severityChart} options={{ plugins: { legend: { display: false } } }} />}
         </div>
 
-        <div className="rounded-2xl p-5 border border-slate-700/50 bg-slate-900/45 backdrop-blur-xl mb-6">
-          <div className="flex items-center gap-2 mb-3 text-slate-300 font-medium text-sm">
+        <div className="glass-strong rounded-2xl p-5 border border-slate-300/80 backdrop-blur-xl mb-6">
+          <div className="flex items-center gap-2 mb-3 text-slate-700 font-medium text-sm">
             <SlidersHorizontal size={15} /> Smart Filters
           </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
@@ -229,29 +229,29 @@ export default function PublicIssuesPage() {
         </div>
 
         {loading ? (
-          <div className="text-center py-14 text-slate-400">Loading public issues...</div>
+          <div className="text-center py-14 text-slate-600">Loading public issues...</div>
         ) : issues.length === 0 ? (
-          <div className="rounded-2xl p-8 text-center border border-slate-700/50 bg-slate-900/45 text-slate-400">
+          <div className="glass-strong rounded-2xl p-8 text-center border border-slate-300/80 text-slate-600">
             No issues matched your filters.
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-3">
             {issues.map((issue) => (
-              <div key={issue.id} className="rounded-2xl p-4 border border-slate-700/50 bg-slate-900/45 backdrop-blur-xl">
+              <div key={issue.id} className="glass rounded-2xl p-4 border border-slate-300/80 backdrop-blur-xl">
                 <div className="flex items-start justify-between gap-3 flex-wrap mb-1">
-                  <h3 className="text-slate-100 font-semibold">#{issue.id} {issue.title}</h3>
+                  <h3 className="text-slate-800 font-semibold">#{issue.id} {issue.title}</h3>
                   <div className="flex items-center gap-2 text-xs">
-                    <span className="px-2 py-1 rounded-lg border border-slate-600/40 text-slate-300 capitalize">{issue.status.replace("_", " ")}</span>
-                    <span className="px-2 py-1 rounded-lg border border-slate-600/40 text-slate-300 capitalize">{issue.severity}</span>
+                    <span className="px-2 py-1 rounded-lg border border-slate-300 text-slate-700 capitalize">{issue.status.replace("_", " ")}</span>
+                    <span className="px-2 py-1 rounded-lg border border-slate-300 text-slate-700 capitalize">{issue.severity}</span>
                   </div>
                 </div>
-                <p className="text-sm text-slate-400 mb-3 line-clamp-2">{issue.description}</p>
-                <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
+                <p className="text-sm text-slate-600 mb-3 line-clamp-2">{issue.description}</p>
+                <div className="flex flex-wrap items-center gap-3 text-xs text-slate-600">
                   <span className="capitalize">{CATEGORY_LABELS[issue.category] || issue.category}</span>
                   <span>Reporter: {issue.reporter_name}</span>
                   <span>Posted: {formatDate(issue.created_at)}</span>
                   <span className="inline-flex items-center gap-1"><ThumbsUp size={12} /> {issue.upvote_count || 0}</span>
-                  <span className="inline-flex items-center gap-1 text-amber-300"><Star size={12} /> {issue.avg_rating ? issue.avg_rating.toFixed(1) : "No rating"}</span>
+                  <span className="inline-flex items-center gap-1 text-amber-700"><Star size={12} /> {issue.avg_rating ? issue.avg_rating.toFixed(1) : "No rating"}</span>
                   {issue.address && <span className="inline-flex items-center gap-1"><MapPin size={12} /> {issue.address}</span>}
                 </div>
               </div>

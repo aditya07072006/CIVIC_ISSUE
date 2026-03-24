@@ -232,7 +232,7 @@ export default function AdminDashboard() {
             <div key={s.label} className="glass-strong rounded-2xl p-4" style={{border:`1px solid ${meta.border}`}}>
               <div className="mb-2" style={{color:meta.color}}>{s.icon}</div>
               <p className="text-2xl font-bold" style={{color:meta.color}}>{s.value}</p>
-              <p className="text-slate-400 text-xs mt-1">{s.label}</p>
+              <p className="text-slate-600 text-xs mt-1">{s.label}</p>
             </div>
             );
           })}
@@ -242,7 +242,7 @@ export default function AdminDashboard() {
         {stats && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <div className="glass-strong rounded-2xl p-5">
-              <p className="text-sm font-semibold text-slate-300 mb-4">Status Distribution</p>
+              <p className="text-sm font-semibold text-slate-700 mb-4">Status Distribution</p>
                 <div className="flex justify-center" style={{ height: 220 }}>
                   {statusChartData && (
                     <Doughnut
@@ -253,7 +253,7 @@ export default function AdminDashboard() {
                         plugins: {
                           legend: {
                             position: "bottom",
-                            labels: { color: "#94a3b8", boxWidth: 12, padding: 12 },
+                            labels: { color: "#475569", boxWidth: 12, padding: 12 },
                           },
                         },
                       }}
@@ -262,7 +262,7 @@ export default function AdminDashboard() {
                 </div>
             </div>
             <div className="glass-strong rounded-2xl p-5">
-              <p className="text-sm font-semibold text-slate-300 mb-4">Issues by Category</p>
+              <p className="text-sm font-semibold text-slate-700 mb-4">Issues by Category</p>
                 <div style={{ height: 220 }}>
                   {categoryChartData && (
                     <Bar
@@ -274,8 +274,8 @@ export default function AdminDashboard() {
                           legend: { display: false },
                         },
                         scales: {
-                          x: { ticks: { color: "#94a3b8" }, grid: { color: "#334155" } },
-                          y: { ticks: { color: "#94a3b8" }, grid: { color: "#334155" } },
+                          x: { ticks: { color: "#475569" }, grid: { color: "#cbd5e1" } },
+                          y: { ticks: { color: "#475569" }, grid: { color: "#cbd5e1" } },
                         },
                       }}
                     />
@@ -288,7 +288,7 @@ export default function AdminDashboard() {
         {/* Trend Chart */}
         {trendChartData && (
           <div className="glass-strong rounded-2xl p-5 mb-8">
-            <p className="text-sm font-semibold text-slate-300 mb-4">Issues Reported — Last 30 Days</p>
+            <p className="text-sm font-semibold text-slate-700 mb-4">Issues Reported — Last 30 Days</p>
               <div style={{ height: 220 }}>
                 <Line
                   data={trendChartData}
@@ -297,8 +297,8 @@ export default function AdminDashboard() {
                     maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: {
-                      x: { ticks: { color: "#94a3b8", maxTicksLimit: 10 }, grid: { color: "#1e293b" } },
-                      y: { ticks: { color: "#94a3b8", stepSize: 1 }, grid: { color: "#1e293b" }, beginAtZero: true },
+                      x: { ticks: { color: "#475569", maxTicksLimit: 10 }, grid: { color: "#cbd5e1" } },
+                      y: { ticks: { color: "#475569", stepSize: 1 }, grid: { color: "#cbd5e1" }, beginAtZero: true },
                     },
                   }}
                 />
@@ -313,8 +313,8 @@ export default function AdminDashboard() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              className="w-full pl-9 pr-4 py-2 rounded-xl text-sm text-slate-200 placeholder-slate-500 outline-none"
-              style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)"}}
+              className="w-full pl-9 pr-4 py-2 rounded-xl text-sm text-slate-700 placeholder-slate-500 outline-none"
+              style={{background:"rgba(255,255,255,0.96)",border:"1px solid rgba(15,61,145,0.2)"}}
             />
           </div>
           {[{key:"category",options:Object.entries(CATEGORY_LABELS).map(([k,v])=>({value:k,label:v})),placeholder:"All Categories"},{key:"severity",options:[{value:"low",label:"Low"},{value:"medium",label:"Medium"},{value:"high",label:"High"},{value:"critical",label:"Critical"}],placeholder:"All Severity"},{key:"status",options:[{value:"pending",label:"Pending"},{value:"in_progress",label:"In Progress"},{value:"resolved",label:"Resolved"},{value:"rejected",label:"Rejected"},{value:"overdue",label:"⚠ Overdue"}],placeholder:"All Status"}].map(({key,options,placeholder}) => (
@@ -328,12 +328,12 @@ export default function AdminDashboard() {
                   setFilters({...filters,[key]:e.target.value});
                 }
               }}
-              className="px-3 py-2 rounded-xl text-sm text-slate-300 outline-none"
+              className="px-3 py-2 rounded-xl text-sm text-slate-700 outline-none"
               style={key==="status" && overdueOnly
                 ? {background:"rgba(249,115,22,0.12)",border:"1px solid rgba(249,115,22,0.4)",color:"#fb923c"}
-                : {background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)"}}>
-              <option value="" style={{background:"#0f172a"}}>{placeholder}</option>
-              {options.map(o => <option key={o.value} value={o.value} style={{background:"#0f172a"}}>{o.label}</option>)}
+                : {background:"rgba(255,255,255,0.96)",border:"1px solid rgba(15,61,145,0.2)",color:"#0f172a"}}>
+              <option value="" style={{background:"#ffffff",color:"#0f172a"}}>{placeholder}</option>
+              {options.map(o => <option key={o.value} value={o.value} style={{background:"#ffffff",color:"#0f172a"}}>{o.label}</option>)}
             </select>
           ))}
         </div>
@@ -345,8 +345,8 @@ export default function AdminDashboard() {
               <button key={id} onClick={() => setActiveTab(id)}
                 className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-all"
                 style={activeTab===id
-                  ? {background:"linear-gradient(135deg,rgba(34,211,238,0.15),rgba(168,85,247,0.15))",border:"1px solid rgba(34,211,238,0.25)",color:"#22d3ee"}
-                  : {background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",color:"#64748b"}}>
+                  ? {background:"linear-gradient(135deg,rgba(15,61,145,0.12),rgba(28,91,191,0.14))",border:"1px solid rgba(15,61,145,0.25)",color:"#0f3d91"}
+                  : {background:"rgba(255,255,255,0.96)",border:"1px solid rgba(15,61,145,0.18)",color:"#475569"}}>
                 {icon} {label}
               </button>
             ))}
@@ -372,7 +372,7 @@ export default function AdminDashboard() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="text-slate-500 text-xs uppercase" style={{borderBottom:"1px solid rgba(255,255,255,0.06)"}}>
+                    <tr className="text-slate-600 text-xs uppercase" style={{borderBottom:"1px solid rgba(15,61,145,0.12)"}}>
                       <th className="text-left px-4 py-3">Issue</th>
                       <th className="text-left px-4 py-3">Category</th>
                       <th className="text-left px-4 py-3">Severity</th>
@@ -386,17 +386,17 @@ export default function AdminDashboard() {
                   <tbody>
                     {displayedIssues.map((issue) => (
                       <tr key={issue.id} className="transition-colors cursor-pointer"
-                        style={{borderBottom:"1px solid rgba(255,255,255,0.04)"}}
-                        onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,0.03)"}
+                        style={{borderBottom:"1px solid rgba(15,61,145,0.08)"}}
+                        onMouseEnter={e=>e.currentTarget.style.background="rgba(15,61,145,0.05)"}
                         onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
                         <td className="px-4 py-3">
                           <div className="max-w-xs">
-                            <p className="font-medium text-slate-100 truncate">{issue.title}</p>
-                            <p className="text-slate-500 text-xs truncate">{issue.description}</p>
+                            <p className="font-medium text-slate-800 truncate">{issue.title}</p>
+                            <p className="text-slate-600 text-xs truncate">{issue.description}</p>
                           </div>
                         </td>
                         <td className="px-4 py-3">
-                          <span className="text-slate-400 capitalize text-xs">{CATEGORY_LABELS[issue.category] || issue.category}</span>
+                          <span className="text-slate-600 capitalize text-xs">{CATEGORY_LABELS[issue.category] || issue.category}</span>
                         </td>
                         <td className="px-4 py-3"><Badge variant={issue.severity}>{issue.severity}</Badge></td>
                         <td className="px-4 py-3">
@@ -405,20 +405,20 @@ export default function AdminDashboard() {
                               className="w-10 h-10 rounded-lg object-cover cursor-pointer hover:opacity-80 transition-opacity ring-1 ring-white/10"
                               onClick={() => setImageModal(issue.image.startsWith("http") ? issue.image : `/uploads/${issue.image}`)} />
                           ) : (
-                            <span className="text-slate-600 text-xs">—</span>
+                            <span className="text-slate-500 text-xs">—</span>
                           )}
                         </td>
-                        <td className="px-4 py-3 text-slate-400 text-xs">{issue.reporter_name}</td>
-                        <td className="px-4 py-3 text-slate-400 text-xs">{formatDate(issue.created_at)}</td>
+                        <td className="px-4 py-3 text-slate-600 text-xs">{issue.reporter_name}</td>
+                        <td className="px-4 py-3 text-slate-600 text-xs">{formatDate(issue.created_at)}</td>
                         <td className="px-4 py-3">
                           <select value={issue.status}
                             onChange={(e) => handleStatusChange(issue.id, e.target.value)}
-                            className="text-slate-200 rounded-lg px-2 py-1 text-xs outline-none"
-                            style={{background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.1)"}}>
-                            <option value="pending" style={{background:"#0f172a"}}>Pending</option>
-                            <option value="in_progress" style={{background:"#0f172a"}}>In Progress</option>
-                            <option value="resolved" style={{background:"#0f172a"}}>Resolved</option>
-                            <option value="rejected" style={{background:"#0f172a"}}>Rejected</option>
+                            className="text-slate-700 rounded-lg px-2 py-1 text-xs outline-none"
+                            style={{background:"rgba(255,255,255,0.96)",border:"1px solid rgba(15,61,145,0.18)"}}>
+                            <option value="pending" style={{background:"#ffffff",color:"#0f172a"}}>Pending</option>
+                            <option value="in_progress" style={{background:"#ffffff",color:"#0f172a"}}>In Progress</option>
+                            <option value="resolved" style={{background:"#ffffff",color:"#0f172a"}}>Resolved</option>
+                            <option value="rejected" style={{background:"#ffffff",color:"#0f172a"}}>Rejected</option>
                           </select>
                         </td>
                         <td className="px-4 py-3">
@@ -445,7 +445,7 @@ export default function AdminDashboard() {
         {/* Map Tab */}
         {activeTab === "map" && (
           <div className="glass-strong rounded-2xl p-5">
-            <p className="text-sm font-semibold text-slate-300 mb-4">City Issue Map ({mapIssues.length} locations)</p>
+            <p className="text-sm font-semibold text-slate-700 mb-4">City Issue Map ({mapIssues.length} locations)</p>
               <IssueMap issues={mapIssues} />
               <div className="flex gap-3 mt-4 flex-wrap">
                 {[
@@ -456,7 +456,7 @@ export default function AdminDashboard() {
                 ].map((l) => (
                   <div key={l.label} className="flex items-center gap-1.5">
                     <div className="w-2.5 h-2.5 rounded-full" style={{background:l.color}} />
-                    <span className="text-xs text-slate-400">{l.label}</span>
+                    <span className="text-xs text-slate-600">{l.label}</span>
                   </div>
                 ))}
               </div>
@@ -472,7 +472,7 @@ export default function AdminDashboard() {
         size="lg"
       >
         {detailLoading ? (
-          <div className="text-center py-12 text-slate-400">
+          <div className="text-center py-12 text-slate-600">
             <div className="w-6 h-6 border-2 border-cyan-500/30 border-t-cyan-400 rounded-full animate-spin mx-auto mb-3" />
             Loading…
           </div>
@@ -484,13 +484,13 @@ export default function AdminDashboard() {
                 onClick={() => setImageModal(detail.image.startsWith("http") ? detail.image : `/uploads/${detail.image}`)} />
             )}
             <div className="flex items-start justify-between gap-3 flex-wrap">
-              <h2 className="text-xl font-bold text-slate-100">{detail.title}</h2>
+              <h2 className="text-xl font-bold text-slate-800">{detail.title}</h2>
               <div className="flex gap-2">
                 <Badge variant={detail.severity}>{detail.severity}</Badge>
                 <Badge variant={detail.status}>{detail.status.replace("_", " ")}</Badge>
               </div>
             </div>
-            <p className="text-slate-300 text-sm leading-relaxed">{detail.description}</p>
+            <p className="text-slate-700 text-sm leading-relaxed">{detail.description}</p>
             <div className="grid grid-cols-2 gap-3">
               {[
                 {label:"Category",value:(CATEGORY_LABELS[detail.category]||detail.category),cap:true},
@@ -498,9 +498,9 @@ export default function AdminDashboard() {
                 {label:"Reported",value:formatDate(detail.created_at)},
                 {label:"SLA",value:`${detail.sla_hours}h expected`},
               ].map(item=>(
-                <div key={item.label} className="rounded-xl p-3" style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.07)"}}>
+                <div key={item.label} className="rounded-xl p-3" style={{background:"rgba(255,255,255,0.96)",border:"1px solid rgba(15,61,145,0.14)"}}>
                   <p className="text-slate-500 text-xs mb-0.5">{item.label}</p>
-                  <p className={`text-slate-200 font-medium text-sm ${item.cap?"capitalize":""}`}>{item.value}</p>
+                  <p className={`text-slate-700 font-medium text-sm ${item.cap?"capitalize":""}`}>{item.value}</p>
                 </div>
               ))}
             </div>
@@ -511,7 +511,7 @@ export default function AdminDashboard() {
                 <p className="text-slate-400 text-xs font-medium uppercase tracking-wide mb-2">📍 Location</p>
                 <div className="space-y-1">
                   {detail.address && (
-                    <p className="text-slate-100 text-sm font-medium">{detail.address}</p>
+                    <p className="text-slate-800 text-sm font-medium">{detail.address}</p>
                   )}
                   <p className="text-slate-400 text-xs">
                     Coordinates: {parseFloat(detail.latitude).toFixed(6)}, {parseFloat(detail.longitude).toFixed(6)}
@@ -533,7 +533,7 @@ export default function AdminDashboard() {
                       className="px-3 py-1.5 rounded-xl text-xs font-semibold capitalize transition-all"
                       style={active
                         ? {background:`${colors[s]}22`,border:`1px solid ${colors[s]}`,color:colors[s]}
-                        : {background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",color:"#64748b"}}>
+                        : {background:"rgba(255,255,255,0.96)",border:"1px solid rgba(15,61,145,0.14)",color:"#475569"}}>
                       {s.replace("_"," ")}
                     </button>
                   );
@@ -544,14 +544,14 @@ export default function AdminDashboard() {
             {/* Timeline */}
             {detail.timeline?.length > 0 && (
               <div>
-                <h4 className="text-sm font-semibold text-slate-300 mb-3">Activity Timeline</h4>
+                <h4 className="text-sm font-semibold text-slate-700 mb-3">Activity Timeline</h4>
                 <div className="flex flex-col gap-2">
                   {detail.timeline.map((t, i) => (
                     <div key={i} className="flex items-start gap-3">
                       <div className="w-2 h-2 rounded-full mt-1.5 shrink-0"
                         style={{background:"linear-gradient(135deg,#22d3ee,#a855f7)"}} />
                       <div>
-                        <p className="text-sm text-slate-300">{t.action}</p>
+                        <p className="text-sm text-slate-700">{t.action}</p>
                         <p className="text-xs text-slate-500">
                           {formatDate(t.created_at)}{t.actor_name ? ` · ${t.actor_name}` : ""}
                         </p>
@@ -572,7 +572,7 @@ export default function AdminDashboard() {
         title="Confirm Delete"
         size="sm"
       >
-        <p className="text-slate-300 mb-6">
+        <p className="text-slate-700 mb-6">
           Are you sure you want to delete this issue? This action cannot be undone.
         </p>
         <div className="flex gap-3 justify-end">

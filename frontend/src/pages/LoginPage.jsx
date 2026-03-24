@@ -52,7 +52,7 @@ export default function LoginPage() {
             <span className="text-xl font-bold gradient-text">CivicPortal</span>
           </div>
 
-          <h2 className="text-4xl font-black text-white mb-3 leading-tight">
+          <h2 className="text-4xl font-black text-slate-800 mb-3 leading-tight">
             Your voice,<br />
             <span className="gradient-text">your city.</span>
           </h2>
@@ -109,7 +109,7 @@ export default function LoginPage() {
           </div>
 
           <div className="mb-8">
-            <h1 className="text-2xl font-bold text-white">Welcome back</h1>
+            <h1 className="text-2xl font-bold text-slate-800">Welcome back</h1>
             <p className="text-slate-500 mt-1 text-sm">Sign in to your account</p>
           </div>
 

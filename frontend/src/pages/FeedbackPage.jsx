@@ -87,22 +87,22 @@ export default function FeedbackPage() {
   };
 
   return (
-    <div className="min-h-screen p-4 md:p-8" style={{ background: "#050b14" }}>
+    <div className="animated-bg min-h-screen p-4 md:p-8">
       <div className="max-w-5xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Issue Feedback</h1>
-          <p className="text-slate-400">
+          <h1 className="text-3xl md:text-4xl font-bold text-slate-800 mb-2">Issue Feedback</h1>
+          <p className="text-slate-600">
             Tell us whether your reported issue was solved properly, and share any additional comments.
           </p>
         </div>
 
         {loading ? (
-          <div className="text-center py-14 text-slate-400">
-            <div className="w-8 h-8 mx-auto mb-3 border-2 border-cyan-400/30 border-t-cyan-400 rounded-full animate-spin" />
+          <div className="text-center py-14 text-slate-600">
+            <div className="w-8 h-8 mx-auto mb-3 border-2 border-blue-700/25 border-t-blue-700 rounded-full animate-spin" />
             Loading feedback items...
           </div>
         ) : items.length === 0 ? (
-          <div className="rounded-2xl p-6 text-slate-400 border border-slate-700/50 bg-slate-900/40">
+          <div className="glass-strong rounded-2xl p-6 text-slate-600 border border-slate-300/80">
             No resolved or rejected issues yet. Feedback will appear here once your issue is closed.
           </div>
         ) : (
@@ -113,13 +113,13 @@ export default function FeedbackPage() {
               return (
                 <div
                   key={item.id}
-                  className="rounded-2xl p-5 border border-slate-700/50 bg-slate-900/40 backdrop-blur-xl"
+                  className="glass-strong rounded-2xl p-5 border border-slate-300/80 backdrop-blur-xl"
                 >
                   <div className="flex items-start justify-between gap-3 flex-wrap mb-4">
                     <div>
                       <p className="text-xs text-slate-500 mb-1">Issue #{item.id}</p>
-                      <h3 className="text-lg font-semibold text-white">{item.title}</h3>
-                      <p className="text-sm text-slate-400 mt-1">
+                      <h3 className="text-lg font-semibold text-slate-800">{item.title}</h3>
+                      <p className="text-sm text-slate-600 mt-1">
                         {CATEGORY_LABELS[item.category] || item.category} • {item.severity} • {item.status.replace("_", " ")}
                       </p>
                     </div>
@@ -134,7 +134,7 @@ export default function FeedbackPage() {
 
                   <div className="space-y-4">
                     <div>
-                      <p className="text-sm font-medium text-slate-200 mb-2">Was the issue solved properly?</p>
+                      <p className="text-sm font-medium text-slate-700 mb-2">Was the issue solved properly?</p>
                       <div className="flex gap-2 flex-wrap">
                         <button
                           type="button"
@@ -142,7 +142,7 @@ export default function FeedbackPage() {
                           className="px-3 py-2 rounded-xl text-sm font-medium flex items-center gap-2"
                           style={form.is_satisfied === true
                             ? { background: "rgba(16,185,129,0.18)", color: "#34d399", border: "1px solid rgba(16,185,129,0.5)" }
-                            : { background: "rgba(255,255,255,0.04)", color: "#94a3b8", border: "1px solid rgba(255,255,255,0.12)" }}
+                            : { background: "rgba(255,255,255,0.96)", color: "#475569", border: "1px solid rgba(15,61,145,0.14)" }}
                         >
                           <CheckCircle2 size={15} /> Yes, solved well
                         </button>
@@ -152,7 +152,7 @@ export default function FeedbackPage() {
                           className="px-3 py-2 rounded-xl text-sm font-medium flex items-center gap-2"
                           style={form.is_satisfied === false
                             ? { background: "rgba(239,68,68,0.18)", color: "#f87171", border: "1px solid rgba(239,68,68,0.5)" }
-                            : { background: "rgba(255,255,255,0.04)", color: "#94a3b8", border: "1px solid rgba(255,255,255,0.12)" }}
+                            : { background: "rgba(255,255,255,0.96)", color: "#475569", border: "1px solid rgba(15,61,145,0.14)" }}
                         >
                           <XCircle size={15} /> No, not solved properly
                         </button>
@@ -160,13 +160,13 @@ export default function FeedbackPage() {
                     </div>
 
                     <div>
-                      <label className="text-sm font-medium text-slate-200 mb-2 flex items-center gap-2">
+                      <label className="text-sm font-medium text-slate-700 mb-2 flex items-center gap-2">
                         <Star size={15} className="text-amber-400" /> Rating (optional)
                       </label>
                       <select
                         value={form.rating}
                         onChange={(e) => updateForm(item.id, { rating: e.target.value })}
-                        className="w-full md:w-52 rounded-xl px-3 py-2 text-sm bg-slate-800/60 text-slate-100 border border-slate-600/40"
+                        className="w-full md:w-52 rounded-xl px-3 py-2 text-sm bg-white text-slate-800 border border-slate-300"
                       >
                         <option value="">Select rating</option>
                         <option value="5">5 - Excellent</option>
@@ -178,7 +178,7 @@ export default function FeedbackPage() {
                     </div>
 
                     <div>
-                      <label className="text-sm font-medium text-slate-200 mb-2 flex items-center gap-2">
+                      <label className="text-sm font-medium text-slate-700 mb-2 flex items-center gap-2">
                         <MessageSquare size={15} className="text-cyan-400" /> Additional comments
                       </label>
                       <textarea
@@ -186,7 +186,7 @@ export default function FeedbackPage() {
                         value={form.comment}
                         onChange={(e) => updateForm(item.id, { comment: e.target.value })}
                         placeholder="Share what was good, what was missed, or what should improve..."
-                        className="w-full rounded-xl px-3 py-2 text-sm bg-slate-800/60 text-slate-100 border border-slate-600/40 resize-y"
+                        className="w-full rounded-xl px-3 py-2 text-sm bg-white text-slate-800 border border-slate-300 resize-y"
                       />
                     </div>
 
@@ -197,7 +197,7 @@ export default function FeedbackPage() {
                         disabled={savingId === item.id}
                         className="px-4 py-2 rounded-xl text-sm font-semibold text-white flex items-center gap-2"
                         style={{
-                          background: "linear-gradient(135deg,#22d3ee,#8b5cf6)",
+                          background: "linear-gradient(135deg,#0f3d91,#1c5bbf)",
                           opacity: savingId === item.id ? 0.6 : 1,
                         }}
                       >

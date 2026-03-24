@@ -2,6 +2,12 @@
 
 A production-ready Smart City Civic Issue Management Platform.
 
+## Detailed Documentation
+
+For complete technical documentation (stack, architecture, APIs, DB schema, setup, deployment, and feature list), see:
+
+- [PROJECT_DOCUMENTATION.md](PROJECT_DOCUMENTATION.md)
+
 ## Tech Stack
 
 | Layer | Technology |

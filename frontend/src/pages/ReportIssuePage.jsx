@@ -121,15 +121,15 @@ export default function ReportIssuePage() {
     <div className="animated-bg min-h-screen relative overflow-x-hidden">
       {/* Decorative orbs */}
       <div className="pointer-events-none fixed inset-0 z-0" aria-hidden>
-        <div style={{position:"absolute",top:"10%",left:"5%",width:380,height:380,borderRadius:"50%",background:"radial-gradient(circle,rgba(34,211,238,0.07) 0%,transparent 70%)"}} />
-        <div style={{position:"absolute",bottom:"15%",right:"5%",width:300,height:300,borderRadius:"50%",background:"radial-gradient(circle,rgba(168,85,247,0.07) 0%,transparent 70%)"}} />
+        <div style={{position:"absolute",top:"10%",left:"5%",width:380,height:380,borderRadius:"50%",background:"radial-gradient(circle,rgba(15,61,145,0.08) 0%,transparent 70%)"}} />
+        <div style={{position:"absolute",bottom:"15%",right:"5%",width:300,height:300,borderRadius:"50%",background:"radial-gradient(circle,rgba(245,158,11,0.08) 0%,transparent 70%)"}} />
       </div>
 
       <div className="relative z-10 max-w-3xl mx-auto px-4 py-10">
         {/* Page header */}
         <div className="mb-8 text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4"
-            style={{background:"rgba(34,211,238,0.1)",border:"1px solid rgba(34,211,238,0.25)",color:"#22d3ee"}}>
+            style={{background:"rgba(15,61,145,0.1)",border:"1px solid rgba(15,61,145,0.25)",color:"#0f3d91"}}>
             <Zap size={11} /> Civic Report Portal
           </div>
           <h1 className="text-3xl font-bold gradient-text mb-2">Report a Civic Issue</h1>
@@ -164,11 +164,11 @@ export default function ReportIssuePage() {
                 <select
                   value={form.category}
                   onChange={(e) => setForm({ ...form, category: e.target.value })}
-                  className="w-full rounded-xl text-sm text-slate-100 px-3 py-2.5 outline-none transition-all"
-                  style={{background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)"}}
+                  className="w-full rounded-xl text-sm text-slate-800 px-3 py-2.5 outline-none transition-all"
+                  style={{background:"rgba(255,255,255,0.96)",border:"1px solid rgba(15,61,145,0.18)"}}
                 >
                   {CATEGORIES.map((c) => (
-                    <option key={c.value} value={c.value} style={{background:"#0f172a"}}>{c.label}</option>
+                    <option key={c.value} value={c.value} style={{background:"#ffffff",color:"#0f172a"}}>{c.label}</option>
                   ))}
                 </select>
               </div>
@@ -177,11 +177,11 @@ export default function ReportIssuePage() {
                 <select
                   value={form.severity}
                   onChange={(e) => setForm({ ...form, severity: e.target.value })}
-                  className="w-full rounded-xl text-sm text-slate-100 px-3 py-2.5 outline-none transition-all"
-                  style={{background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)"}}
+                  className="w-full rounded-xl text-sm text-slate-800 px-3 py-2.5 outline-none transition-all"
+                  style={{background:"rgba(255,255,255,0.96)",border:"1px solid rgba(15,61,145,0.18)"}}
                 >
                   {SEVERITIES.map((s) => (
-                    <option key={s.value} value={s.value} style={{background:"#0f172a"}}>{s.label}</option>
+                    <option key={s.value} value={s.value} style={{background:"#ffffff",color:"#0f172a"}}>{s.label}</option>
                   ))}
                 </select>
               </div>
@@ -198,8 +198,8 @@ export default function ReportIssuePage() {
                     onClick={() => setForm({...form, severity: s.value})}
                     className="px-3 py-1 rounded-full text-xs font-semibold transition-all"
                     style={{
-                      background: active ? `${colors[s.value]}22` : "rgba(255,255,255,0.04)",
-                      border: `1px solid ${active ? colors[s.value] : "rgba(255,255,255,0.08)"}`,
+                      background: active ? `${colors[s.value]}22` : "rgba(255,255,255,0.96)",
+                      border: `1px solid ${active ? colors[s.value] : "rgba(15,61,145,0.14)"}`,
                       color: active ? colors[s.value] : "#64748b",
                     }}
                   >{s.label}</button>
@@ -260,7 +260,7 @@ export default function ReportIssuePage() {
                 type="button"
                 onClick={handleGeolocate}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all"
-                style={{background:"rgba(34,211,238,0.1)",border:"1px solid rgba(34,211,238,0.2)",color:"#22d3ee"}}
+                style={{background:"rgba(15,61,145,0.1)",border:"1px solid rgba(15,61,145,0.2)",color:"#0f3d91"}}
               >
                 <Navigation size={13} /> Use My Location
               </button>
@@ -284,8 +284,8 @@ export default function ReportIssuePage() {
             disabled={loading}
             className="w-full py-4 rounded-2xl font-bold text-base text-white transition-all relative overflow-hidden"
             style={{
-              background: loading ? "rgba(255,255,255,0.05)" : "linear-gradient(135deg,#22d3ee,#a855f7)",
-              boxShadow: loading ? "none" : "0 0 40px rgba(34,211,238,0.3)",
+              background: loading ? "rgba(148,163,184,0.2)" : "linear-gradient(135deg,#0f3d91,#1c5bbf)",
+              boxShadow: loading ? "none" : "0 0 30px rgba(15,61,145,0.25)",
               cursor: loading ? "not-allowed" : "pointer",
             }}
           >
