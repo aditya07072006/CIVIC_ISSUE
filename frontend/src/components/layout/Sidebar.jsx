@@ -2,7 +2,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import {
   Activity, LayoutDashboard, Plus, ShieldCheck, LogOut,
-  X, Map, BarChart2, FileText, MessageSquare, Globe2, ChevronLeft, ChevronRight,
+  X, Map, BarChart2, FileText, MessageSquare, Globe2, ChevronLeft, ChevronRight, Download,
 } from "lucide-react";
 
 const citizenLinks = [
@@ -10,6 +10,7 @@ const citizenLinks = [
   { to: "/public-issues", label: "Public Issues", icon: Globe2 },
   { to: "/feedback", label: "Feedback", icon: MessageSquare },
   { to: "/report",    label: "Report Issue", icon: Plus },
+  { to: "/receipts", label: "Receipt Downloads", icon: Download },
 ];
 
 const adminLinks = [

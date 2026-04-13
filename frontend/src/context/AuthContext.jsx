@@ -22,8 +22,16 @@ export function AuthProvider({ children }) {
     return u;
   };
 
-  const register = async (name, email, password) => {
-    await api.post("/auth/register", { name, email, password });
+  const register = async (name, email, password, address, pincode, latitude, longitude) => {
+    await api.post("/auth/register", {
+      name,
+      email,
+      password,
+      address,
+      pincode,
+      latitude,
+      longitude,
+    });
   };
 
   const logout = () => {

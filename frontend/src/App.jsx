@@ -9,6 +9,7 @@ import CitizenDashboard from "./pages/CitizenDashboard";
 import ReportIssuePage from "./pages/ReportIssuePage";
 import FeedbackPage from "./pages/FeedbackPage";
 import PublicIssuesPage from "./pages/PublicIssuesPage";
+import ReceiptDownloadsPage from "./pages/ReceiptDownloadsPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import DeletedIssuesPage from "./pages/DeletedIssuesPage";
 import AdminFeedbackPage from "./pages/AdminFeedbackPage";
@@ -60,6 +61,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <AppLayout><PublicIssuesPage /></AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/receipts"
+        element={
+          <ProtectedRoute>
+            <AppLayout><ReceiptDownloadsPage /></AppLayout>
           </ProtectedRoute>
         }
       />

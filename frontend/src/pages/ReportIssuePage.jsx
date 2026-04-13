@@ -1,10 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "../components/ui/Button";
-import { Input, Textarea, Select } from "../components/ui/Input";
+import { Input, Textarea } from "../components/ui/Input";
 import { MapPicker } from "../components/map/MapPicker";
 import { reverseGeocode } from "../utils/geocoding";
-import { AlertTriangle, Upload, MapPin, Navigation, CheckCircle2, Zap } from "lucide-react";
+import { AlertTriangle, Upload, MapPin, Navigation, CheckCircle2, Zap, Download } from "lucide-react";
 import api from "../api/axios";
 import toast from "react-hot-toast";
 
@@ -25,6 +24,20 @@ const SEVERITIES = [
   { value: "critical", label: "Critical" },
 ];
 
+const THANE_CENTER = { lat: 19.2183, lng: 72.9781 };
+const THANE_RADIUS_METERS = 25000;
+
+function haversineMeters(lat1, lon1, lat2, lon2) {
+  const toRad = (v) => (v * Math.PI) / 180;
+  const r = 6371000;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  return r * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
 export default function ReportIssuePage() {
   const navigate = useNavigate();
   const [form, setForm] = useState({
@@ -39,6 +52,24 @@ export default function ReportIssuePage() {
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [receipt, setReceipt] = useState(null);
+
+  const handleDownloadReceipt = async () => {
+    if (!receipt?.id) return;
+    try {
+      const res = await api.get(`/issues/${receipt.id}/receipt`, { responseType: "blob" });
+      const blobUrl = window.URL.createObjectURL(new Blob([res.data], { type: "application/pdf" }));
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = `issue-receipt-${receipt.issue_token || receipt.id}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      toast.error(err.response?.data?.error || "Failed to download receipt");
+    }
+  };
 
   const handleLocationSelect = async (lat, lng) => {
     setForm((f) => ({ ...f, latitude: lat, longitude: lng }));
@@ -97,15 +128,28 @@ export default function ReportIssuePage() {
       return;
     }
 
+    const lat = parseFloat(form.latitude);
+    const lng = parseFloat(form.longitude);
+    const distance = haversineMeters(lat, lng, THANE_CENTER.lat, THANE_CENTER.lng);
+    if (distance > THANE_RADIUS_METERS) {
+      toast.error("Only issues within Thane are allowed");
+      return;
+    }
+    if (form.address && !form.address.toLowerCase().includes("thane")) {
+      toast.error("Please provide an address in Thane");
+      return;
+    }
+
     setLoading(true);
     const fd = new FormData();
     Object.entries(form).forEach(([k, v]) => fd.append(k, v));
     if (image) fd.append("image", image);
 
     try {
-      await api.post("/issues", fd);
-      toast.success("Issue reported successfully!");
-      navigate("/dashboard");
+      const res = await api.post("/issues", fd);
+      const issueData = res.data || {};
+      setReceipt({ id: issueData.id, issue_token: issueData.issue_token });
+      toast.success(`Issue reported successfully. Token: ${issueData.issue_token || issueData.id}`);
     } catch (err) {
       if (err.response?.data?.error === "duplicate") {
         toast.error(err.response.data.message);
@@ -157,6 +201,12 @@ export default function ReportIssuePage() {
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
               required
+            />
+            <Input
+              label="Address"
+              placeholder="e.g. Near Main Street, Ward 4"
+              value={form.address}
+              onChange={(e) => setForm({ ...form, address: e.target.value })}
             />
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -272,7 +322,14 @@ export default function ReportIssuePage() {
                 Location set: {parseFloat(form.latitude).toFixed(5)}, {parseFloat(form.longitude).toFixed(5)}
               </div>
             )}
-            <MapPicker lat={form.latitude} lng={form.longitude} address={form.address} onLocationSelect={handleLocationSelect} />
+            <MapPicker
+              lat={form.latitude}
+              lng={form.longitude}
+              address={form.address}
+              onLocationSelect={handleLocationSelect}
+              onInvalidLocation={(msg) => toast.error(msg)}
+            />
+            
             {!form.latitude && (
               <p className="text-slate-500 text-xs flex items-center gap-1"><MapPin size={11} /> Click the map to pin the issue location</p>
             )}
@@ -303,6 +360,42 @@ export default function ReportIssuePage() {
               </span>
             )}
           </button>
+
+          {receipt?.id && (
+            <div className="rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+              style={{ background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.25)" }}>
+              <div>
+                <p className="text-sm font-semibold text-emerald-300">Issue submitted successfully</p>
+                <p className="text-xs text-emerald-200 mt-1">Token No: {receipt.issue_token || receipt.id}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleDownloadReceipt}
+                  className="px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5"
+                  style={{ background: "rgba(255,255,255,0.95)", color: "#065f46", border: "1px solid rgba(16,185,129,0.3)" }}
+                >
+                  <Download size={14} /> Download PDF Receipt
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate("/receipts")}
+                  className="px-3 py-2 rounded-xl text-xs font-semibold"
+                  style={{ background: "rgba(34,197,94,0.12)", color: "#166534", border: "1px solid rgba(34,197,94,0.3)" }}
+                >
+                  Go to Receipt Downloads
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate("/dashboard")}
+                  className="px-3 py-2 rounded-xl text-xs font-semibold"
+                  style={{ background: "rgba(15,61,145,0.12)", color: "#0f3d91", border: "1px solid rgba(15,61,145,0.22)" }}
+                >
+                  Go to Dashboard
+                </button>
+              </div>
+            </div>
+          )}
         </form>
       </div>
     </div>

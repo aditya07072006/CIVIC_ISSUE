@@ -1,16 +1,24 @@
 import os
 import uuid
 import math
-from datetime import datetime, timezone
-from flask import Blueprint, request, jsonify
+import io
+import textwrap
+import urllib.request
+from datetime import datetime, timezone, timedelta
+from flask import Blueprint, request, jsonify, send_file
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from werkzeug.utils import secure_filename
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.utils import ImageReader
 from database import get_db
 from config import Config
+from location_guard import is_thane_address, is_within_thane_coordinates
 
 issues_bp = Blueprint("issues", __name__)
 
 ALLOWED_EXTENSIONS = Config.ALLOWED_EXTENSIONS
+IST_TZ = timezone(timedelta(hours=5, minutes=30))
 
 
 def allowed_file(filename):
@@ -51,6 +59,31 @@ def add_timeline(db, issue_id, action, performed_by):
         )
 
 
+def generate_issue_token():
+    return f"THN-{datetime.now().strftime('%Y%m%d')}-{uuid.uuid4().hex[:6].upper()}"
+
+
+def _draw_wrapped_text(pdf, text, x, y, max_chars=95, line_height=14):
+    if not text:
+        return y
+    lines = textwrap.wrap(str(text), width=max_chars)
+    for line in lines:
+        pdf.drawString(x, y, line)
+        y -= line_height
+    return y
+
+
+def _format_timestamp(value):
+    if not value:
+        return "N/A"
+    if hasattr(value, "strftime"):
+        if getattr(value, "tzinfo", None) is None:
+            # MySQL timestamps are typically naive here; treat them as IST for display.
+            return f"{value.strftime('%Y-%m-%d %H:%M:%S')} IST"
+        return value.astimezone(IST_TZ).strftime("%Y-%m-%d %H:%M:%S IST")
+    return str(value)
+
+
 @issues_bp.route("", methods=["POST"])
 @jwt_required()
 def create_issue():
@@ -67,28 +100,41 @@ def create_issue():
     if not all([title, description, category, severity]):
         return jsonify({"error": "title, description, category, severity are required"}), 400
 
+    if not latitude or not longitude:
+        return jsonify({"error": "Location coordinates are required. Only Thane issues are allowed"}), 400
+
+    try:
+        lat = float(latitude)
+        lon = float(longitude)
+    except (TypeError, ValueError):
+        return jsonify({"error": "Invalid latitude/longitude values"}), 400
+
+    if not is_within_thane_coordinates(lat, lon):
+        return jsonify({"error": "Only issues within Thane are allowed"}), 403
+
+    if address and not is_thane_address(address):
+        return jsonify({"error": "Issue address must be in Thane"}), 403
+
     # Duplicate detection within 30m radius
-    if latitude and longitude:
-        lat, lon = float(latitude), float(longitude)
-        db = get_db()
-        try:
-            with db.cursor() as cursor:
-                cursor.execute(
-                    "SELECT id, latitude, longitude FROM issues WHERE category = %s AND status != 'resolved' AND deleted_at IS NULL",
-                    (category,),
-                )
-                existing = cursor.fetchall()
-                for ex in existing:
-                    if ex["latitude"] and ex["longitude"]:
-                        dist = haversine(lat, lon, float(ex["latitude"]), float(ex["longitude"]))
-                        if dist <= 30:
-                            return jsonify({
-                                "error": "duplicate",
-                                "message": f"A similar issue already exists within 30m (Issue #{ex['id']}). Please check existing reports.",
-                                "existing_id": ex["id"],
-                            }), 409
-        finally:
-            db.close()
+    db = get_db()
+    try:
+        with db.cursor() as cursor:
+            cursor.execute(
+                "SELECT id, latitude, longitude FROM issues WHERE category = %s AND status != 'resolved' AND deleted_at IS NULL",
+                (category,),
+            )
+            existing = cursor.fetchall()
+            for ex in existing:
+                if ex["latitude"] and ex["longitude"]:
+                    dist = haversine(lat, lon, float(ex["latitude"]), float(ex["longitude"]))
+                    if dist <= 30:
+                        return jsonify({
+                            "error": "duplicate",
+                            "message": f"A similar issue already exists within 30m (Issue #{ex['id']}). Please check existing reports.",
+                            "existing_id": ex["id"],
+                        }), 409
+    finally:
+        db.close()
 
     image_filename = None
     if "image" in request.files:
@@ -109,18 +155,131 @@ def create_issue():
     db = get_db()
     try:
         with db.cursor() as cursor:
-            cursor.execute(
-                """INSERT INTO issues (title, description, category, severity, latitude, longitude,
-                   image, address, status, priority, sla_hours, user_id)
-                   VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 'pending', %s, %s, %s)""",
-                (title, description, category, severity,
-                 latitude or None, longitude or None,
-                 image_filename, address or None, priority, sla_hours, user_id),
-            )
+            issue_token = None
+            inserted = False
+            for _ in range(3):
+                issue_token = generate_issue_token()
+                try:
+                    cursor.execute(
+                        """INSERT INTO issues (title, description, category, severity, latitude, longitude,
+                           image, address, issue_token, status, priority, sla_hours, user_id)
+                           VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 'pending', %s, %s, %s)""",
+                        (title, description, category, severity,
+                         latitude or None, longitude or None,
+                         image_filename, address or None, issue_token, priority, sla_hours, user_id),
+                    )
+                    inserted = True
+                    break
+                except Exception as exc:
+                    if "uniq_issue_token" not in str(exc):
+                        raise
+            if not inserted:
+                return jsonify({"error": "Could not generate issue token. Please try again"}), 500
             issue_id = cursor.lastrowid
             add_timeline(db, issue_id, "Issue reported by citizen", user_id)
             db.commit()
-            return jsonify({"message": "Issue reported successfully", "id": issue_id}), 201
+            return jsonify({
+                "message": "Issue reported successfully",
+                "id": issue_id,
+                "issue_token": issue_token,
+            }), 201
+    finally:
+        db.close()
+
+
+@issues_bp.route("/<int:issue_id>/receipt", methods=["GET"])
+@jwt_required()
+def download_issue_receipt(issue_id):
+    user_id = get_jwt_identity()
+    user = get_user(user_id)
+
+    db = get_db()
+    try:
+        with db.cursor() as cursor:
+            cursor.execute(
+                """SELECT i.*, u.name AS reporter_name, u.email AS reporter_email
+                   FROM issues i
+                   JOIN users u ON i.user_id = u.id
+                   WHERE i.id = %s AND i.deleted_at IS NULL""",
+                (issue_id,),
+            )
+            issue = cursor.fetchone()
+            if not issue:
+                return jsonify({"error": "Issue not found"}), 404
+
+            if user["role"] != "admin" and str(issue["user_id"]) != str(user_id):
+                return jsonify({"error": "Access denied"}), 403
+
+        buffer = io.BytesIO()
+        pdf = canvas.Canvas(buffer, pagesize=A4)
+        page_w, page_h = A4
+        left = 40
+        y = page_h - 45
+
+        pdf.setTitle(f"Issue_Receipt_{issue.get('issue_token') or issue_id}")
+        pdf.setFont("Helvetica-Bold", 16)
+        pdf.drawString(left, y, "Civic Issue Receipt")
+        y -= 24
+
+        pdf.setFont("Helvetica", 10)
+        generated_at = datetime.now(timezone.utc).astimezone(IST_TZ).strftime("%Y-%m-%d %H:%M:%S IST")
+        issue_created_at = _format_timestamp(issue.get("created_at"))
+        y = _draw_wrapped_text(pdf, f"Issue Reported At: {issue_created_at}", left, y)
+        y = _draw_wrapped_text(pdf, f"Receipt Generated At: {generated_at}", left, y)
+        y = _draw_wrapped_text(pdf, f"Issue ID: {issue['id']}", left, y)
+        y = _draw_wrapped_text(pdf, f"Token No: {issue.get('issue_token') or 'N/A'}", left, y)
+        y = _draw_wrapped_text(pdf, f"Reporter: {issue.get('reporter_name')} ({issue.get('reporter_email')})", left, y)
+        y -= 6
+
+        pdf.setFont("Helvetica-Bold", 11)
+        pdf.drawString(left, y, "Issue Details")
+        y -= 16
+        pdf.setFont("Helvetica", 10)
+
+        y = _draw_wrapped_text(pdf, f"Title: {issue.get('title') or ''}", left, y)
+        y = _draw_wrapped_text(pdf, f"Description: {issue.get('description') or ''}", left, y)
+        y = _draw_wrapped_text(pdf, f"Address: {issue.get('address') or ''}", left, y)
+        y = _draw_wrapped_text(pdf, f"Category: {issue.get('category') or ''}", left, y)
+        y = _draw_wrapped_text(pdf, f"Severity: {issue.get('severity') or ''}", left, y)
+        y = _draw_wrapped_text(pdf, f"Status: {issue.get('status') or ''}", left, y)
+        y = _draw_wrapped_text(pdf, f"Coordinates: {issue.get('latitude') or ''}, {issue.get('longitude') or ''}", left, y)
+
+        image_value = issue.get("image")
+        if image_value and y > 180:
+            y -= 8
+            pdf.setFont("Helvetica-Bold", 11)
+            pdf.drawString(left, y, "Issue Photo")
+            y -= 12
+            pdf.setFont("Helvetica", 9)
+
+            img_reader = None
+            try:
+                if isinstance(image_value, str) and image_value.startswith("http"):
+                    with urllib.request.urlopen(image_value, timeout=10) as response:
+                        img_reader = ImageReader(io.BytesIO(response.read()))
+                else:
+                    image_path = os.path.join(Config.UPLOAD_FOLDER, str(image_value))
+                    if os.path.exists(image_path):
+                        img_reader = ImageReader(image_path)
+
+                if img_reader:
+                    pdf.drawImage(img_reader, left, max(60, y - 220), width=260, height=180, preserveAspectRatio=True, mask='auto')
+                else:
+                    pdf.drawString(left, y, f"Image reference: {image_value}")
+            except Exception:
+                pdf.drawString(left, y, f"Image reference: {image_value}")
+
+        pdf.showPage()
+        pdf.save()
+        buffer.seek(0)
+
+        token_part = issue.get("issue_token") or f"ISSUE-{issue_id}"
+        return send_file(
+            buffer,
+            mimetype="application/pdf",
+            as_attachment=True,
+            download_name=f"issue-receipt-{token_part}.pdf",
+        )
     finally:
         db.close()
 

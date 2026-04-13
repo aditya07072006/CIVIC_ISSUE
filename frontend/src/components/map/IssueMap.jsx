@@ -17,6 +17,12 @@ const severityColors = {
   critical: "purple",
 };
 
+const THANE_CENTER = [19.2183, 72.9781];
+const THANE_BOUNDS = [
+  [18.99, 72.74],
+  [19.45, 73.22],
+];
+
 function createColoredIcon(color) {
   return L.divIcon({
     html: `<div style="background:${color};width:14px;height:14px;border-radius:50%;border:2px solid white;box-shadow:0 0 4px rgba(0,0,0,0.5)"></div>`,
@@ -27,11 +33,18 @@ function createColoredIcon(color) {
 }
 
 export function IssueMap({ issues }) {
-  const center = [20.5937, 78.9629];
+  const center = THANE_CENTER;
 
   return (
     <div className="border border-slate-600 rounded-xl overflow-hidden" style={{ height: 400 }}>
-      <MapContainer center={center} zoom={5} style={{ height: "100%", width: "100%" }}>
+      <MapContainer
+        center={center}
+        zoom={12}
+        minZoom={11}
+        maxBounds={THANE_BOUNDS}
+        maxBoundsViscosity={1.0}
+        style={{ height: "100%", width: "100%" }}
+      >
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; OpenStreetMap contributors'

@@ -69,6 +69,50 @@ def _ensure_feedback_table():
     finally:
         db.close()
 
+
+def _column_exists(cursor, table_name, column_name):
+    cursor.execute(
+        """SELECT 1
+           FROM information_schema.columns
+           WHERE table_schema = %s AND table_name = %s AND column_name = %s
+           LIMIT 1""",
+        (Config.DB_NAME, table_name, column_name),
+    )
+    return cursor.fetchone() is not None
+
+
+def _ensure_location_and_token_columns():
+    from database import get_db
+    db = get_db()
+    try:
+        with db.cursor() as cursor:
+            user_columns = {
+                "address": "ALTER TABLE users ADD COLUMN address VARCHAR(255) NULL",
+                "pincode": "ALTER TABLE users ADD COLUMN pincode VARCHAR(10) NULL",
+                "latitude": "ALTER TABLE users ADD COLUMN latitude DECIMAL(10, 7) NULL",
+                "longitude": "ALTER TABLE users ADD COLUMN longitude DECIMAL(10, 7) NULL",
+            }
+            for column_name, ddl in user_columns.items():
+                if not _column_exists(cursor, "users", column_name):
+                    cursor.execute(ddl)
+
+            if not _column_exists(cursor, "issues", "issue_token"):
+                cursor.execute("ALTER TABLE issues ADD COLUMN issue_token VARCHAR(32) NULL")
+
+            cursor.execute(
+                """SELECT 1
+                   FROM information_schema.statistics
+                   WHERE table_schema = %s AND table_name = 'issues' AND index_name = 'uniq_issue_token'
+                   LIMIT 1""",
+                (Config.DB_NAME,),
+            )
+            if cursor.fetchone() is None:
+                cursor.execute("ALTER TABLE issues ADD UNIQUE KEY uniq_issue_token (issue_token)")
+
+            db.commit()
+    finally:
+        db.close()
+
 with app.app_context():
     try:
         _ensure_upvotes_table()
@@ -78,6 +122,10 @@ with app.app_context():
         _ensure_feedback_table()
     except Exception as e:
         print(f"[WARN] Could not create feedback table on startup: {e}")
+    try:
+        _ensure_location_and_token_columns()
+    except Exception as e:
+        print(f"[WARN] Could not ensure location/token columns on startup: {e}")
 
 app.register_blueprint(auth_bp, url_prefix="/api/auth")
 app.register_blueprint(issues_bp, url_prefix="/api/issues")

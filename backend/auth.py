@@ -2,6 +2,7 @@ import bcrypt
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from database import get_db
+from location_guard import is_thane_address, is_thane_pincode, is_within_thane_coordinates
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -16,15 +17,30 @@ def verify_password(password: str, hashed: str) -> bool:
 
 @auth_bp.route("/register", methods=["POST"])
 def register():
-    data = request.get_json()
+    data = request.get_json() or {}
     name = data.get("name", "").strip()
     email = data.get("email", "").strip().lower()
     password = data.get("password", "").strip()
+    address = data.get("address", "").strip()
+    pincode = data.get("pincode", "").strip()
+    latitude = data.get("latitude")
+    longitude = data.get("longitude")
 
-    if not name or not email or not password:
-        return jsonify({"error": "All fields are required"}), 400
+    if not name or not email or not password or not address or not pincode or latitude is None or longitude is None:
+        return jsonify({"error": "Name, email, password, address, pincode, latitude and longitude are required"}), 400
     if len(password) < 6:
         return jsonify({"error": "Password must be at least 6 characters"}), 400
+    if not is_thane_address(address):
+        return jsonify({"error": "Registration is allowed only for Thane residents"}), 403
+    if not is_thane_pincode(pincode):
+        return jsonify({"error": "Only Thane pincodes are allowed for registration"}), 403
+    try:
+        lat = float(latitude)
+        lng = float(longitude)
+    except (TypeError, ValueError):
+        return jsonify({"error": "Invalid latitude/longitude values"}), 400
+    if not is_within_thane_coordinates(lat, lng):
+        return jsonify({"error": "Registration is allowed only for users located in Thane"}), 403
 
     db = get_db()
     try:
@@ -34,8 +50,9 @@ def register():
                 return jsonify({"error": "Email already registered"}), 409
             hashed = hash_password(password)
             cursor.execute(
-                "INSERT INTO users (name, email, password, role) VALUES (%s, %s, %s, 'citizen')",
-                (name, email, hashed),
+                """INSERT INTO users (name, email, password, role, address, pincode, latitude, longitude)
+                   VALUES (%s, %s, %s, 'citizen', %s, %s, %s, %s)""",
+                (name, email, hashed, address, pincode, lat, lng),
             )
             db.commit()
             return jsonify({"message": "Registration successful"}), 201
