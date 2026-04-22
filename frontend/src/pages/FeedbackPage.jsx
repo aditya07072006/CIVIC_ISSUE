@@ -1,4 +1,7 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
+import { Card } from "../components/ui/Card";
+import { Badge } from "../components/ui/Badge";
+import { Input, Select, Textarea } from "../components/ui/Input";
 import { CheckCircle2, XCircle, MessageSquare, Star, Send, RefreshCcw } from "lucide-react";
 import toast from "react-hot-toast";
 import api from "../api/axios";
@@ -25,11 +28,15 @@ function formatDate(str) {
 export default function FeedbackPage() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
   const [savingId, setSavingId] = useState(null);
   const [forms, setForms] = useState({});
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
 
   const loadItems = useCallback(async () => {
     setLoading(true);
+    setErrorMessage("");
     try {
       const res = await api.get("/issues/feedback/my");
       setItems(res.data);
@@ -42,8 +49,10 @@ export default function FeedbackPage() {
         };
       }
       setForms(initial);
-    } catch {
-      toast.error("Failed to load feedback items");
+    } catch (err) {
+      const message = err.response?.data?.error || "Failed to load feedback items";
+      setErrorMessage(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -52,6 +61,19 @@ export default function FeedbackPage() {
   useEffect(() => {
     loadItems();
   }, [loadItems]);
+
+  const filteredItems = useMemo(() => {
+    return items.filter((item) => {
+      if (statusFilter && item.status !== statusFilter) return false;
+      if (!search) return true;
+      const q = search.toLowerCase();
+      return (
+        String(item.title || "").toLowerCase().includes(q)
+        || String(item.category || "").toLowerCase().includes(q)
+        || String(item.comment || "").toLowerCase().includes(q)
+      );
+    });
+  }, [items, search, statusFilter]);
 
   const updateForm = (issueId, patch) => {
     setForms((prev) => ({
@@ -87,33 +109,76 @@ export default function FeedbackPage() {
   };
 
   return (
-    <div className="animated-bg min-h-screen p-4 md:p-8">
-      <div className="max-w-5xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-slate-800 mb-2">Issue Feedback</h1>
-          <p className="text-slate-600">
-            Tell us whether your reported issue was solved properly, and share any additional comments.
-          </p>
-        </div>
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50/60 to-amber-50/40 p-4 md:p-6">
+      <div className="w-full">
+        <Card className="overflow-hidden border border-slate-200/70 mb-6">
+          <div className="bg-[radial-gradient(circle_at_top_left,rgba(15,61,145,0.14),transparent_28%),linear-gradient(135deg,rgba(255,255,255,0.98),rgba(248,250,252,0.92))] p-6 md:p-8">
+            <div className="space-y-3">
+              <Badge variant="resolved">Citizen feedback</Badge>
+              <h1 className="text-3xl font-semibold tracking-tight text-slate-900 md:text-5xl">Issue Feedback</h1>
+              <p className="max-w-2xl text-sm leading-6 text-slate-600 md:text-base">
+                Tell us whether your reported issue was solved properly, and share any additional comments.
+              </p>
+            </div>
+          </div>
+        </Card>
+
+        {!loading && items.length > 0 && (
+          <Card className="border border-slate-200/70 p-4 mb-5 flex flex-col md:flex-row gap-3">
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by issue title or category"
+              className="flex-1"
+            />
+            <Select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="md:w-48"
+            >
+              <option value="">All statuses</option>
+              <option value="resolved">Resolved</option>
+              <option value="rejected">Rejected</option>
+            </Select>
+            <button
+              type="button"
+              onClick={loadItems}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-linear-to-r from-blue-600 to-cyan-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-blue-200"
+            >
+              Refresh
+            </button>
+          </Card>
+        )}
+
+        {!loading && errorMessage && (
+          <div className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-700">
+            {errorMessage}
+          </div>
+        )}
 
         {loading ? (
-          <div className="text-center py-14 text-slate-600">
+          <Card className="border border-slate-200/70 p-8 text-center text-slate-600">
             <div className="w-8 h-8 mx-auto mb-3 border-2 border-blue-700/25 border-t-blue-700 rounded-full animate-spin" />
             Loading feedback items...
-          </div>
+          </Card>
         ) : items.length === 0 ? (
-          <div className="glass-strong rounded-2xl p-6 text-slate-600 border border-slate-300/80">
+          <Card className="border border-slate-200/70 p-6 text-slate-600">
             No resolved or rejected issues yet. Feedback will appear here once your issue is closed.
-          </div>
+          </Card>
+        ) : filteredItems.length === 0 ? (
+          <Card className="border border-slate-200/70 p-6 text-slate-600">
+            No feedback entries match your current filters.
+          </Card>
         ) : (
           <div className="grid grid-cols-1 gap-5">
-            {items.map((item) => {
+            {filteredItems.map((item) => {
               const form = forms[item.id] || { is_satisfied: null, rating: "", comment: "" };
               const submitted = Boolean(item.feedback_id);
+              const canSubmitFeedback = item.status === "resolved" || item.status === "rejected";
               return (
-                <div
+                <Card
                   key={item.id}
-                  className="glass-strong rounded-2xl p-5 border border-slate-300/80 backdrop-blur-xl"
+                  className="border border-slate-200/70 p-5"
                 >
                   <div className="flex items-start justify-between gap-3 flex-wrap mb-4">
                     <div>
@@ -132,6 +197,12 @@ export default function FeedbackPage() {
                     </div>
                   )}
 
+                  {!canSubmitFeedback && (
+                    <div className="mb-4 rounded-xl p-3 border border-amber-500/30 bg-amber-500/10 text-amber-700 text-sm">
+                      Feedback is available after this issue is marked as resolved or rejected.
+                    </div>
+                  )}
+
                   <div className="space-y-4">
                     <div>
                       <p className="text-sm font-medium text-slate-700 mb-2">Was the issue solved properly?</p>
@@ -139,20 +210,16 @@ export default function FeedbackPage() {
                         <button
                           type="button"
                           onClick={() => updateForm(item.id, { is_satisfied: true })}
-                          className="px-3 py-2 rounded-xl text-sm font-medium flex items-center gap-2"
-                          style={form.is_satisfied === true
-                            ? { background: "rgba(16,185,129,0.18)", color: "#34d399", border: "1px solid rgba(16,185,129,0.5)" }
-                            : { background: "rgba(255,255,255,0.96)", color: "#475569", border: "1px solid rgba(15,61,145,0.14)" }}
+                          disabled={!canSubmitFeedback}
+                          className={`inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium ${form.is_satisfied === true ? "border border-emerald-200 bg-emerald-50 text-emerald-700" : "border border-slate-200 bg-white text-slate-700"}`}
                         >
                           <CheckCircle2 size={15} /> Yes, solved well
                         </button>
                         <button
                           type="button"
                           onClick={() => updateForm(item.id, { is_satisfied: false })}
-                          className="px-3 py-2 rounded-xl text-sm font-medium flex items-center gap-2"
-                          style={form.is_satisfied === false
-                            ? { background: "rgba(239,68,68,0.18)", color: "#f87171", border: "1px solid rgba(239,68,68,0.5)" }
-                            : { background: "rgba(255,255,255,0.96)", color: "#475569", border: "1px solid rgba(15,61,145,0.14)" }}
+                          disabled={!canSubmitFeedback}
+                          className={`inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium ${form.is_satisfied === false ? "border border-rose-200 bg-rose-50 text-rose-700" : "border border-slate-200 bg-white text-slate-700"}`}
                         >
                           <XCircle size={15} /> No, not solved properly
                         </button>
@@ -160,13 +227,14 @@ export default function FeedbackPage() {
                     </div>
 
                     <div>
-                      <label className="text-sm font-medium text-slate-700 mb-2 flex items-center gap-2">
+                      <label className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-700">
                         <Star size={15} className="text-amber-400" /> Rating (optional)
                       </label>
-                      <select
+                      <Select
                         value={form.rating}
                         onChange={(e) => updateForm(item.id, { rating: e.target.value })}
-                        className="w-full md:w-52 rounded-xl px-3 py-2 text-sm bg-white text-slate-800 border border-slate-300"
+                        disabled={!canSubmitFeedback}
+                        className="md:w-52"
                       >
                         <option value="">Select rating</option>
                         <option value="5">5 - Excellent</option>
@@ -174,19 +242,20 @@ export default function FeedbackPage() {
                         <option value="3">3 - Average</option>
                         <option value="2">2 - Poor</option>
                         <option value="1">1 - Very Poor</option>
-                      </select>
+                      </Select>
                     </div>
 
                     <div>
-                      <label className="text-sm font-medium text-slate-700 mb-2 flex items-center gap-2">
+                      <label className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-700">
                         <MessageSquare size={15} className="text-cyan-400" /> Additional comments
                       </label>
-                      <textarea
+                      <Textarea
                         rows={3}
                         value={form.comment}
                         onChange={(e) => updateForm(item.id, { comment: e.target.value })}
+                        disabled={!canSubmitFeedback}
                         placeholder="Share what was good, what was missed, or what should improve..."
-                        className="w-full rounded-xl px-3 py-2 text-sm bg-white text-slate-800 border border-slate-300 resize-y"
+                        className="w-full"
                       />
                     </div>
 
@@ -194,19 +263,15 @@ export default function FeedbackPage() {
                       <button
                         type="button"
                         onClick={() => submitFeedback(item.id)}
-                        disabled={savingId === item.id}
-                        className="px-4 py-2 rounded-xl text-sm font-semibold text-white flex items-center gap-2"
-                        style={{
-                          background: "linear-gradient(135deg,#0f3d91,#1c5bbf)",
-                          opacity: savingId === item.id ? 0.6 : 1,
-                        }}
+                        disabled={savingId === item.id || !canSubmitFeedback}
+                        className="inline-flex items-center gap-2 rounded-xl bg-linear-to-r from-blue-600 to-cyan-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-blue-200 disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {savingId === item.id ? <RefreshCcw size={15} className="animate-spin" /> : <Send size={15} />}
                         {submitted ? "Update Feedback" : "Submit Feedback"}
                       </button>
                     </div>
                   </div>
-                </div>
+                </Card>
               );
             })}
           </div>

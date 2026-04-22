@@ -20,6 +20,16 @@ issues_bp = Blueprint("issues", __name__)
 ALLOWED_EXTENSIONS = Config.ALLOWED_EXTENSIONS
 IST_TZ = timezone(timedelta(hours=5, minutes=30))
 
+CATEGORY_TO_SUBDEPT = {
+    "pothole": "Pothole",
+    "garbage": "Garbage Overflow",
+    "water_leakage": "Water Leakage",
+    "streetlight": "Streetlight",
+    "road_damage": "Road Damage",
+    "drainage": "Drainage",
+    "other": "Other",
+}
+
 
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -37,7 +47,10 @@ def get_user(user_id):
     try:
         with db.cursor() as cursor:
             cursor.execute("SELECT id, role FROM users WHERE id = %s", (user_id,))
-            return cursor.fetchone()
+            row = cursor.fetchone()
+            if row and row.get("role") is not None:
+                row["role"] = str(row["role"]).lower()
+            return row
     finally:
         db.close()
 
@@ -112,7 +125,10 @@ def create_issue():
     if not is_within_thane_coordinates(lat, lon):
         return jsonify({"error": "Only issues within Thane are allowed"}), 403
 
-    if address and not is_thane_address(address):
+    if not address:
+        return jsonify({"error": "Issue address is required and must be in Thane"}), 400
+
+    if not is_thane_address(address):
         return jsonify({"error": "Issue address must be in Thane"}), 403
 
     # Duplicate detection within 30m radius
@@ -155,6 +171,23 @@ def create_issue():
     db = get_db()
     try:
         with db.cursor() as cursor:
+            sub_dept_name = CATEGORY_TO_SUBDEPT.get(category)
+            department_id = None
+            sub_department_id = None
+            if sub_dept_name:
+                cursor.execute(
+                    """SELECT d.id AS department_id, sd.id AS sub_department_id
+                       FROM sub_departments sd
+                       JOIN departments d ON d.id = sd.department_id
+                       WHERE sd.name = %s
+                       LIMIT 1""",
+                    (sub_dept_name,),
+                )
+                mapping = cursor.fetchone()
+                if mapping:
+                    department_id = mapping["department_id"]
+                    sub_department_id = mapping["sub_department_id"]
+
             issue_token = None
             inserted = False
             for _ in range(3):
@@ -162,11 +195,12 @@ def create_issue():
                 try:
                     cursor.execute(
                         """INSERT INTO issues (title, description, category, severity, latitude, longitude,
-                           image, address, issue_token, status, priority, sla_hours, user_id)
-                           VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 'pending', %s, %s, %s)""",
+                           image, address, issue_token, status, priority, sla_hours, user_id, department_id, sub_department_id)
+                           VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 'pending', %s, %s, %s, %s, %s)""",
                         (title, description, category, severity,
                          latitude or None, longitude or None,
-                         image_filename, address or None, issue_token, priority, sla_hours, user_id),
+                         image_filename, address or None, issue_token, priority, sla_hours, user_id,
+                         department_id, sub_department_id),
                     )
                     inserted = True
                     break
@@ -766,7 +800,6 @@ def get_my_feedback_items():
                    LEFT JOIN issue_feedback f ON f.issue_id = i.id AND f.user_id = %s
                    WHERE i.user_id = %s
                      AND i.deleted_at IS NULL
-                     AND i.status IN ('resolved', 'rejected')
                    ORDER BY i.updated_at DESC""",
                 (user_id, user_id),
             )
@@ -896,5 +929,225 @@ def get_all_feedback():
                 row["is_satisfied"] = bool(row.get("is_satisfied"))
 
             return jsonify(rows), 200
+    finally:
+        db.close()
+
+
+# ========== DEPARTMENT ENDPOINTS ==========
+
+@issues_bp.route("/departments/all", methods=["GET"])
+@jwt_required()
+def get_all_departments():
+    """Get all departments with their sub-departments"""
+    db = get_db()
+    try:
+        with db.cursor() as cursor:
+            cursor.execute("SELECT * FROM departments ORDER BY name ASC")
+            departments = cursor.fetchall()
+            
+            for dept in departments:
+                cursor.execute(
+                    """
+                    SELECT sd.id, sd.name, sd.description, COUNT(i.id) AS issue_count
+                    FROM sub_departments sd
+                    LEFT JOIN issues i ON i.sub_department_id = sd.id AND i.deleted_at IS NULL
+                    WHERE sd.department_id = %s
+                    GROUP BY sd.id, sd.name, sd.description
+                    ORDER BY sd.name ASC
+                    """,
+                    (dept['id'],)
+                )
+                dept['sub_departments'] = cursor.fetchall()
+            
+            return jsonify(departments), 200
+    finally:
+        db.close()
+
+
+@issues_bp.route("/department/<int:dept_id>/issues", methods=["GET"])
+@jwt_required()
+def get_department_issues(dept_id):
+    """Get all issues for a specific department"""
+    status_filter = request.args.get("status")
+    severity = request.args.get("severity")
+    search = request.args.get("search")
+    
+    db = get_db()
+    try:
+        with db.cursor() as cursor:
+            # Get sub-department IDs for this department
+            cursor.execute(
+                "SELECT id FROM sub_departments WHERE department_id = %s",
+                (dept_id,)
+            )
+            sub_dept_ids = [row['id'] for row in cursor.fetchall()]
+            
+            if not sub_dept_ids:
+                return jsonify([]), 200
+            
+            placeholders = ','.join(['%s'] * len(sub_dept_ids))
+            query = f"""
+                SELECT i.*, u.name as reporter_name, u.email as reporter_email,
+                       d.name as department_name, sd.name as sub_department_name,
+                       COUNT(DISTINCT up.user_id) as upvote_count
+                FROM issues i
+                JOIN users u ON i.user_id = u.id
+                LEFT JOIN departments d ON i.department_id = d.id
+                LEFT JOIN sub_departments sd ON i.sub_department_id = sd.id
+                LEFT JOIN issue_upvotes up ON i.id = up.issue_id
+                WHERE i.sub_department_id IN ({placeholders})
+                AND i.deleted_at IS NULL
+            """
+            
+            params = sub_dept_ids
+            
+            if status_filter:
+                query += " AND i.status = %s"
+                params.append(status_filter)
+            if severity:
+                query += " AND i.severity = %s"
+                params.append(severity)
+            if search:
+                query += " AND (i.title LIKE %s OR i.description LIKE %s)"
+                search_param = f"%{search}%"
+                params.extend([search_param, search_param])
+            
+            query += " GROUP BY i.id ORDER BY i.created_at DESC"
+            cursor.execute(query, params)
+            issues = [serialize_issue(i) for i in cursor.fetchall()]
+            
+            return jsonify(issues), 200
+    finally:
+        db.close()
+
+
+@issues_bp.route("/sub_department/<int:sub_dept_id>/issues", methods=["GET"])
+@jwt_required()
+def get_sub_department_issues(sub_dept_id):
+    """Get all issues for a specific sub-department"""
+    status_filter = request.args.get("status")
+    severity = request.args.get("severity")
+    search = request.args.get("search")
+    
+    db = get_db()
+    try:
+        with db.cursor() as cursor:
+            query = """
+                SELECT i.*, u.name as reporter_name, u.email as reporter_email,
+                       d.name as department_name, sd.name as sub_department_name,
+                       COUNT(DISTINCT up.user_id) as upvote_count
+                FROM issues i
+                JOIN users u ON i.user_id = u.id
+                LEFT JOIN departments d ON i.department_id = d.id
+                LEFT JOIN sub_departments sd ON i.sub_department_id = sd.id
+                LEFT JOIN issue_upvotes up ON i.id = up.issue_id
+                WHERE i.sub_department_id = %s
+                AND i.deleted_at IS NULL
+            """
+            
+            params = [sub_dept_id]
+            
+            if status_filter:
+                query += " AND i.status = %s"
+                params.append(status_filter)
+            if severity:
+                query += " AND i.severity = %s"
+                params.append(severity)
+            if search:
+                query += " AND (i.title LIKE %s OR i.description LIKE %s)"
+                search_param = f"%{search}%"
+                params.extend([search_param, search_param])
+            
+            query += " GROUP BY i.id ORDER BY i.created_at DESC"
+            cursor.execute(query, params)
+            issues = [serialize_issue(i) for i in cursor.fetchall()]
+            
+            return jsonify(issues), 200
+    finally:
+        db.close()
+
+
+@issues_bp.route("/<int:issue_id>/assign_department", methods=["PATCH"])
+@jwt_required()
+def assign_department_to_issue(issue_id):
+    """Assign an issue to a department and sub-department"""
+    user_id = get_jwt_identity()
+    user = get_user(user_id)
+    if user["role"] != "admin":
+        return jsonify({"error": "Admin access required"}), 403
+    
+    data = request.get_json()
+    department_id = data.get("department_id")
+    sub_department_id = data.get("sub_department_id")
+    
+    if not department_id or not sub_department_id:
+        return jsonify({"error": "department_id and sub_department_id are required"}), 400
+    
+    db = get_db()
+    try:
+        with db.cursor() as cursor:
+            # Verify department and sub-department exist
+            cursor.execute("SELECT id FROM departments WHERE id = %s", (department_id,))
+            if not cursor.fetchone():
+                return jsonify({"error": "Department not found"}), 404
+            
+            cursor.execute(
+                "SELECT id FROM sub_departments WHERE id = %s AND department_id = %s",
+                (sub_department_id, department_id)
+            )
+            if not cursor.fetchone():
+                return jsonify({"error": "Sub-department not found or doesn't belong to this department"}), 404
+            
+            # Verify issue exists
+            cursor.execute("SELECT id FROM issues WHERE id = %s", (issue_id,))
+            if not cursor.fetchone():
+                return jsonify({"error": "Issue not found"}), 404
+            
+            # Assign department and sub-department
+            cursor.execute(
+                """UPDATE issues 
+                   SET department_id = %s, sub_department_id = %s 
+                   WHERE id = %s""",
+                (department_id, sub_department_id, issue_id)
+            )
+            
+            add_timeline(db, issue_id, f"Issue assigned to department by admin", user_id)
+            db.commit()
+            
+            return jsonify({"message": "Issue assigned to department successfully"}), 200
+    finally:
+        db.close()
+
+
+@issues_bp.route("/department/stats", methods=["GET"])
+@jwt_required()
+def get_department_stats():
+    """Get statistics for all departments"""
+    user_id = get_jwt_identity()
+    user = get_user(user_id)
+    if user["role"] != "admin":
+        return jsonify({"error": "Admin access required"}), 403
+    
+    db = get_db()
+    try:
+        with db.cursor() as cursor:
+            cursor.execute("""
+                SELECT 
+                    d.id,
+                    d.name,
+                    COUNT(i.id) as total_issues,
+                    SUM(CASE WHEN i.status = 'pending' THEN 1 ELSE 0 END) as pending,
+                    SUM(CASE WHEN i.status = 'in_progress' THEN 1 ELSE 0 END) as in_progress,
+                    SUM(CASE WHEN i.status = 'resolved' THEN 1 ELSE 0 END) as resolved,
+                    SUM(CASE WHEN i.status = 'rejected' THEN 1 ELSE 0 END) as rejected
+                FROM departments d
+                LEFT JOIN sub_departments sd ON d.id = sd.department_id
+                LEFT JOIN issues i ON sd.id = i.sub_department_id
+                GROUP BY d.id, d.name
+                ORDER BY d.name ASC
+            """)
+            stats = cursor.fetchall()
+            
+            return jsonify(stats), 200
     finally:
         db.close()

@@ -3,6 +3,7 @@ import { useAuth } from "../../context/AuthContext";
 import {
   Activity, LayoutDashboard, Plus, ShieldCheck, LogOut,
   X, Map, BarChart2, FileText, MessageSquare, Globe2, ChevronLeft, ChevronRight, Download,
+  FolderOpen,
 } from "lucide-react";
 
 const citizenLinks = [
@@ -15,6 +16,8 @@ const citizenLinks = [
 
 const adminLinks = [
   { to: "/admin", label: "Dashboard", icon: ShieldCheck },
+  { to: "/all-issues", label: "All Issues", icon: LayoutDashboard },
+  { to: "/department", label: "Department", icon: FolderOpen },
   { to: "/admin-feedback", label: "Feedback", icon: MessageSquare },
   { to: "/deleted", label: "Deleted Issues", icon: FileText },
 ];
@@ -73,7 +76,7 @@ export function Sidebar({ open, collapsed, onClose, onToggleCollapse }) {
           </div>
           {!collapsed && (
             <span className="font-bold text-base gradient-text whitespace-nowrap">
-              CivicPortal
+              Civic Issue Portal
             </span>
           )}
 

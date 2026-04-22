@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { Card } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
 import { Activity, ArrowRight, Shield, Zap, Globe } from "lucide-react";
@@ -33,129 +34,102 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen animated-bg flex">
-      {/* === LEFT PANEL === */}
-      <div className="hidden lg:flex flex-col flex-1 items-center justify-center p-12 relative overflow-hidden">
-        {/* Decorative orbs */}
-        <div className="absolute top-20 left-10 w-72 h-72 rounded-full blur-3xl opacity-20"
-          style={{ background: "radial-gradient(circle, #22d3ee, transparent)" }} />
-        <div className="absolute bottom-20 right-10 w-60 h-60 rounded-full blur-3xl opacity-15"
-          style={{ background: "radial-gradient(circle, #a855f7, transparent)" }} />
-
-        <div className="relative z-10 max-w-md animate-fade-up">
-          {/* Logo */}
-          <div className="flex items-center gap-3 mb-10">
-            <div className="w-10 h-10 rounded-2xl flex items-center justify-center"
-              style={{ background: "linear-gradient(135deg, #22d3ee, #a855f7)" }}>
-              <Activity size={22} className="text-white" />
-            </div>
-            <span className="text-xl font-bold gradient-text">CivicPortal</span>
-          </div>
-
-          <h2 className="text-4xl font-black text-slate-800 mb-3 leading-tight">
-            Your voice,<br />
-            <span className="gradient-text">your city.</span>
-          </h2>
-          <p className="text-slate-400 text-base mb-10 leading-relaxed">
-            The smart platform connecting citizens with municipal authorities to fix civic issues faster than ever.
-          </p>
-
-          {/* Feature list */}
-          <div className="flex flex-col gap-5">
-            {features.map((f, i) => (
-              <div key={i} className="flex items-start gap-4">
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                  style={{ background: "rgba(34,211,238,0.12)", border: "1px solid rgba(34,211,238,0.2)", color: "#22d3ee" }}>
-                  {f.icon}
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50/60 to-amber-50/40">
+      <div className="w-full px-4 py-6 md:px-8">
+        <Card className="overflow-hidden border border-slate-200/70">
+          <div className="bg-[radial-gradient(circle_at_top_left,rgba(15,61,145,0.14),transparent_28%),linear-gradient(135deg,rgba(255,255,255,0.98),rgba(248,250,252,0.92))] p-6 md:p-8">
+            <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
+              <div className="max-w-2xl space-y-5">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-linear-to-br from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-200">
+                    <Activity size={22} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">Civic Issue Portal</p>
+                    <p className="text-xs text-slate-500">Citizen access portal</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm font-semibold text-slate-200">{f.title}</p>
-                  <p className="text-xs text-slate-500 mt-0.5">{f.desc}</p>
+
+                <div className="space-y-3">
+                  <h1 className="text-4xl font-semibold tracking-tight text-slate-900 md:text-6xl">
+                    Your voice,
+                  </h1>
+                  <p className="text-4xl font-semibold tracking-tight text-blue-700 md:text-6xl">
+                    your city.
+                  </p>
+                </div>
+
+                <p className="max-w-2xl text-sm leading-7 text-slate-600 md:text-base">
+                  The smart platform connecting citizens with municipal authorities to fix civic issues faster than ever.
+                </p>
+
+                <div className="grid gap-4 sm:grid-cols-3">
+                  {features.map((f) => (
+                    <div key={f.title} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                      <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                        {f.icon}
+                      </div>
+                      <p className="text-sm font-semibold text-slate-900">{f.title}</p>
+                      <p className="mt-1 text-xs text-slate-500">{f.desc}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
-            ))}
-          </div>
 
-          {/* Stat bar */}
-          <div className="mt-12 grid grid-cols-3 gap-4">
-            {[["2,400+", "Issues Fixed"], ["98%", "Response Rate"], ["<24h", "Avg. SLA"]].map(([val, lab]) => (
-              <div key={lab} className="text-center">
-                <p className="text-xl font-black gradient-text">{val}</p>
-                <p className="text-xs text-slate-500 mt-0.5">{lab}</p>
+              <div className="w-full max-w-xl">
+                <div className="mb-4 flex items-center justify-between text-xs text-slate-500">
+                  <Link to="/" className="hover:text-slate-700 transition-colors">← Back to Home</Link>
+                  <Link to="/register" className="hover:text-slate-700 transition-colors">Create account</Link>
+                </div>
+
+                <Card className="border border-slate-200/70 p-6 md:p-7">
+                  <div className="mb-6">
+                    <h2 className="text-2xl font-semibold text-slate-900">Welcome back</h2>
+                    <p className="mt-1 text-sm text-slate-500">Sign in to your account</p>
+                  </div>
+
+                  <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                    <Input
+                      label="Email Address"
+                      type="email"
+                      placeholder="you@example.com"
+                      value={form.email}
+                      onChange={(e) => setForm({ ...form, email: e.target.value })}
+                      required
+                    />
+                    <Input
+                      label="Password"
+                      type="password"
+                      placeholder="••••••••"
+                      value={form.password}
+                      onChange={(e) => setForm({ ...form, password: e.target.value })}
+                      required
+                    />
+
+                    <Button type="submit" loading={loading} size="lg" className="mt-2 w-full">
+                      Sign In
+                      {!loading && <ArrowRight size={16} />}
+                    </Button>
+                  </form>
+
+                  <div className="mt-5 text-center">
+                    <p className="text-sm text-slate-500">
+                      No account?{" "}
+                      <Link to="/register" className="font-medium text-blue-700 hover:text-blue-800">
+                        Create one free
+                      </Link>
+                    </p>
+                  </div>
+
+                  <div className="mt-5 rounded-2xl border border-violet-200 bg-violet-50 p-4">
+                    <p className="mb-1.5 text-xs font-semibold text-violet-700">Admin Demo</p>
+                    <p className="text-xs text-slate-600">admin@civic.gov · Admin@123</p>
+                  </div>
+                </Card>
               </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* === RIGHT PANEL === */}
-      <div className="flex flex-1 items-center justify-center px-6 py-12 lg:max-w-md xl:max-w-lg">
-        <div className="w-full max-w-sm animate-fade-up delay-100">
-          {/* Mobile logo + back */}
-          <div className="lg:hidden flex items-center justify-between mb-8">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl flex items-center justify-center"
-                style={{ background: "linear-gradient(135deg, #22d3ee, #a855f7)" }}>
-                <Activity size={16} className="text-white" />
-              </div>
-              <span className="font-bold gradient-text">CivicPortal</span>
-            </div>
-            <Link to="/" className="text-xs text-slate-500 hover:text-slate-300 transition-colors">← Home</Link>
-          </div>
-
-          {/* Desktop back link */}
-          <div className="hidden lg:block mb-6">
-            <Link to="/" className="text-xs text-slate-500 hover:text-slate-300 transition-colors flex items-center gap-1">← Back to Home</Link>
-          </div>
-
-          <div className="mb-8">
-            <h1 className="text-2xl font-bold text-slate-800">Welcome back</h1>
-            <p className="text-slate-500 mt-1 text-sm">Sign in to your account</p>
-          </div>
-
-          <div className="glass-strong rounded-2xl p-7"
-            style={{ border: "1px solid rgba(255,255,255,0.1)" }}>
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-              <Input
-                label="Email Address"
-                type="email"
-                placeholder="you@example.com"
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                required
-              />
-              <Input
-                label="Password"
-                type="password"
-                placeholder="••••••••"
-                value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
-                required
-              />
-
-              <Button type="submit" loading={loading} size="lg" className="w-full mt-2">
-                Sign In
-                {!loading && <ArrowRight size={16} />}
-              </Button>
-            </form>
-
-            <div className="mt-5 text-center">
-              <p className="text-slate-500 text-sm">
-                No account?{" "}
-                <Link to="/register" className="font-medium" style={{ color: "#22d3ee" }}>
-                  Create one free
-                </Link>
-              </p>
-            </div>
-
-            {/* Demo credentials */}
-            <div className="mt-5 p-4 rounded-xl"
-              style={{ background: "rgba(168,85,247,0.08)", border: "1px solid rgba(168,85,247,0.2)" }}>
-              <p className="text-xs font-semibold mb-1.5" style={{ color: "#c084fc" }}>🔐 Admin Demo</p>
-              <p className="text-xs text-slate-400">admin@civic.gov · Admin@123</p>
             </div>
           </div>
-        </div>
+        </Card>
       </div>
     </div>
   );

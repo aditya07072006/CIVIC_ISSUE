@@ -46,7 +46,7 @@ export function Navbar() {
             <div className="absolute inset-0 rounded-xl blur-md opacity-0 group-hover:opacity-60 transition-opacity"
               style={{ background: "linear-gradient(135deg, #0f3d91, #1c5bbf)" }} />
           </div>
-          <span className="font-bold text-base gradient-text hidden sm:block">CivicPortal</span>
+          <span className="font-bold text-base gradient-text hidden sm:block">Civic Issue Portal</span>
         </Link>
 
         {/* Desktop Nav */}

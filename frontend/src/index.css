@@ -31,6 +31,11 @@ body {
   letter-spacing: -0.3px;
 }
 
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
 /* === Typography rhythm === */
 h1, h2, h3, h4, h5, h6 {
   line-height: 1.35;

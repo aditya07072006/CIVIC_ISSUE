@@ -3,7 +3,11 @@ import math
 # Approximate center of Thane city and an inclusive radius for municipal area checks.
 THANE_CENTER_LAT = 19.2183
 THANE_CENTER_LNG = 72.9781
-THANE_RADIUS_METERS = 25000
+THANE_RADIUS_METERS = 18000
+THANE_MIN_LAT = 19.11
+THANE_MAX_LAT = 19.34
+THANE_MIN_LNG = 72.90
+THANE_MAX_LNG = 73.08
 THANE_PINCODES = {
     "400601", "400602", "400603", "400604", "400605",
     "400606", "400607", "400608", "400610", "400612",
@@ -39,5 +43,7 @@ def is_thane_pincode(pincode):
 
 
 def is_within_thane_coordinates(latitude, longitude):
+    if not (THANE_MIN_LAT <= latitude <= THANE_MAX_LAT and THANE_MIN_LNG <= longitude <= THANE_MAX_LNG):
+        return False
     distance = _haversine_meters(latitude, longitude, THANE_CENTER_LAT, THANE_CENTER_LNG)
     return distance <= THANE_RADIUS_METERS

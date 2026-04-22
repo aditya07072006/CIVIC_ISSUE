@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Card } from "../components/ui/Card";
 import { Input, Textarea } from "../components/ui/Input";
 import { MapPicker } from "../components/map/MapPicker";
 import { reverseGeocode } from "../utils/geocoding";
-import { AlertTriangle, Upload, MapPin, Navigation, CheckCircle2, Zap, Download } from "lucide-react";
+import { AlertTriangle, Upload, MapPin, Navigation, CheckCircle2, Zap, Download, ShieldCheck, ArrowRight } from "lucide-react";
 import api from "../api/axios";
 import toast from "react-hot-toast";
 
@@ -25,7 +26,13 @@ const SEVERITIES = [
 ];
 
 const THANE_CENTER = { lat: 19.2183, lng: 72.9781 };
-const THANE_RADIUS_METERS = 25000;
+const THANE_RADIUS_METERS = 18000;
+const THANE_BOUNDS = {
+  minLat: 19.11,
+  maxLat: 19.34,
+  minLng: 72.90,
+  maxLng: 73.08,
+};
 
 function haversineMeters(lat1, lon1, lat2, lon2) {
   const toRad = (v) => (v * Math.PI) / 180;
@@ -130,13 +137,28 @@ export default function ReportIssuePage() {
 
     const lat = parseFloat(form.latitude);
     const lng = parseFloat(form.longitude);
+    const isInsideBounds =
+      lat >= THANE_BOUNDS.minLat &&
+      lat <= THANE_BOUNDS.maxLat &&
+      lng >= THANE_BOUNDS.minLng &&
+      lng <= THANE_BOUNDS.maxLng;
+
+    if (!isInsideBounds) {
+      toast.error("Only issues within Thane are allowed");
+      return;
+    }
+
     const distance = haversineMeters(lat, lng, THANE_CENTER.lat, THANE_CENTER.lng);
     if (distance > THANE_RADIUS_METERS) {
       toast.error("Only issues within Thane are allowed");
       return;
     }
-    if (form.address && !form.address.toLowerCase().includes("thane")) {
-      toast.error("Please provide an address in Thane");
+    if (!form.address.trim()) {
+      toast.error("Address is required and must be in Thane");
+      return;
+    }
+    if (!form.address.toLowerCase().includes("thane")) {
+      toast.error("Issue address must be in Thane");
       return;
     }
 
@@ -162,28 +184,44 @@ export default function ReportIssuePage() {
   };
 
   return (
-    <div className="animated-bg min-h-screen relative overflow-x-hidden">
+    <div className="min-h-screen relative overflow-x-hidden bg-linear-to-br from-slate-50 via-blue-50/60 to-amber-50/40">
       {/* Decorative orbs */}
       <div className="pointer-events-none fixed inset-0 z-0" aria-hidden>
         <div style={{position:"absolute",top:"10%",left:"5%",width:380,height:380,borderRadius:"50%",background:"radial-gradient(circle,rgba(15,61,145,0.08) 0%,transparent 70%)"}} />
         <div style={{position:"absolute",bottom:"15%",right:"5%",width:300,height:300,borderRadius:"50%",background:"radial-gradient(circle,rgba(245,158,11,0.08) 0%,transparent 70%)"}} />
       </div>
 
-      <div className="relative z-10 max-w-3xl mx-auto px-4 py-10">
-        {/* Page header */}
-        <div className="mb-8 text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4"
-            style={{background:"rgba(15,61,145,0.1)",border:"1px solid rgba(15,61,145,0.25)",color:"#0f3d91"}}>
-            <Zap size={11} /> Civic Report Portal
+      <div className="relative z-10 w-full px-4 py-6 md:px-6">
+        <Card className="overflow-hidden border border-slate-200/70 mb-6">
+          <div className="bg-[radial-gradient(circle_at_top_left,rgba(15,61,145,0.14),transparent_28%),linear-gradient(135deg,rgba(255,255,255,0.98),rgba(248,250,252,0.92))] p-6 md:p-8">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+              <div className="max-w-3xl space-y-4">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
+                    <ShieldCheck size={14} /> Civic Report Portal
+                  </span>
+                </div>
+                <div className="space-y-3">
+                  <h1 className="text-3xl font-semibold tracking-tight text-slate-900 md:text-5xl">
+                    Report a Civic Issue
+                  </h1>
+                  <p className="max-w-2xl text-sm leading-6 text-slate-600 md:text-base">
+                    Help improve your city. Every report counts, and the municipal authority reviews all submissions.
+                  </p>
+                </div>
+              </div>
+              <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+                <p className="text-xs font-medium uppercase tracking-[0.18em] text-slate-500">Ready to submit?</p>
+                <p className="mt-2 text-lg font-semibold text-slate-900">Use location, attach evidence, and send it in one flow.</p>
+              </div>
+            </div>
           </div>
-          <h1 className="text-3xl font-bold gradient-text mb-2">Report a Civic Issue</h1>
-          <p className="text-slate-400 text-sm">Help improve your city — every report counts. The municipal authority reviews all submissions.</p>
-        </div>
+        </Card>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
           {/* Issue Details */}
-          <div className="glass-strong rounded-2xl p-6 flex flex-col gap-5">
-            <div className="flex items-center gap-2 text-sm font-semibold text-slate-200 border-b border-white/5 pb-3">
+          <Card className="border border-slate-200/70 p-6 flex flex-col gap-5">
+            <div className="flex items-center gap-2 border-b border-slate-200 pb-3 text-sm font-semibold text-slate-900">
               <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
                 style={{background:"linear-gradient(135deg,#22d3ee,#a855f7)"}}>1</span>
               Issue Details
@@ -208,9 +246,9 @@ export default function ReportIssuePage() {
               value={form.address}
               onChange={(e) => setForm({ ...form, address: e.target.value })}
             />
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1.5">Category</label>
+                <label className="mb-1.5 block text-xs font-medium text-slate-500">Category</label>
                 <select
                   value={form.category}
                   onChange={(e) => setForm({ ...form, category: e.target.value })}
@@ -223,7 +261,7 @@ export default function ReportIssuePage() {
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1.5">Severity</label>
+                <label className="mb-1.5 block text-xs font-medium text-slate-500">Severity</label>
                 <select
                   value={form.severity}
                   onChange={(e) => setForm({ ...form, severity: e.target.value })}
@@ -256,15 +294,15 @@ export default function ReportIssuePage() {
                 );
               })}
             </div>
-          </div>
+          </Card>
 
           {/* Photo Evidence */}
-          <div className="glass-strong rounded-2xl p-6 flex flex-col gap-4">
-            <div className="flex items-center gap-2 text-sm font-semibold text-slate-200 border-b border-white/5 pb-3">
+          <Card className="border border-slate-200/70 p-6 flex flex-col gap-4">
+            <div className="flex items-center gap-2 border-b border-slate-200 pb-3 text-sm font-semibold text-slate-900">
               <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
                 style={{background:"linear-gradient(135deg,#22d3ee,#a855f7)"}}>2</span>
               Photo Evidence
-              <span className="text-slate-500 font-normal ml-1 text-xs">(optional but recommended)</span>
+              <span className="ml-1 text-xs font-normal text-slate-500">(optional but recommended)</span>
             </div>
             <label
               className="flex flex-col items-center justify-center rounded-xl cursor-pointer transition-all group"
@@ -290,18 +328,18 @@ export default function ReportIssuePage() {
                     style={{background:"rgba(34,211,238,0.1)",border:"1px solid rgba(34,211,238,0.2)"}}>
                     <Upload size={22} className="text-cyan-400" />
                   </div>
-                  <p className="text-slate-300 font-medium text-sm">Drop photo here or click to browse</p>
+                  <p className="text-sm font-medium text-slate-700">Drop photo here or click to browse</p>
                   <p className="text-slate-500 text-xs">PNG, JPG, WEBP · up to 10 MB</p>
                 </div>
               )}
               <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
             </label>
-          </div>
+          </Card>
 
           {/* Location */}
-          <div className="glass-strong rounded-2xl p-6 flex flex-col gap-4">
-            <div className="flex items-center justify-between border-b border-white/5 pb-3">
-              <div className="flex items-center gap-2 text-sm font-semibold text-slate-200">
+          <Card className="border border-slate-200/70 p-6 flex flex-col gap-4">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+              <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
                 <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
                   style={{background:"linear-gradient(135deg,#22d3ee,#a855f7)"}}>3</span>
                 Issue Location
@@ -309,15 +347,13 @@ export default function ReportIssuePage() {
               <button
                 type="button"
                 onClick={handleGeolocate}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all"
-                style={{background:"rgba(15,61,145,0.1)",border:"1px solid rgba(15,61,145,0.2)",color:"#0f3d91"}}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-50"
               >
                 <Navigation size={13} /> Use My Location
               </button>
             </div>
             {form.latitude && form.longitude && (
-              <div className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs"
-                style={{background:"rgba(16,185,129,0.08)",border:"1px solid rgba(16,185,129,0.2)",color:"#10b981"}}>
+              <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-700">
                 <CheckCircle2 size={13} />
                 Location set: {parseFloat(form.latitude).toFixed(5)}, {parseFloat(form.longitude).toFixed(5)}
               </div>
@@ -331,26 +367,21 @@ export default function ReportIssuePage() {
             />
             
             {!form.latitude && (
-              <p className="text-slate-500 text-xs flex items-center gap-1"><MapPin size={11} /> Click the map to pin the issue location</p>
+              <p className="flex items-center gap-1 text-xs text-slate-500"><MapPin size={11} /> Click the map to pin the issue location</p>
             )}
-          </div>
+          </Card>
 
           {/* Submit */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-4 rounded-2xl font-bold text-base text-white transition-all relative overflow-hidden"
-            style={{
-              background: loading ? "rgba(148,163,184,0.2)" : "linear-gradient(135deg,#0f3d91,#1c5bbf)",
-              boxShadow: loading ? "none" : "0 0 30px rgba(15,61,145,0.25)",
-              cursor: loading ? "not-allowed" : "pointer",
-            }}
+            className="w-full rounded-2xl bg-linear-to-r from-blue-600 to-cyan-600 py-4 text-base font-semibold text-white shadow-lg shadow-blue-200 transition-transform hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {loading ? (
-              <span className="flex items-center justify-center gap-2 text-slate-400">
+              <span className="flex items-center justify-center gap-2 text-white/80">
                 <svg className="animate-spin" width="18" height="18" viewBox="0 0 24 24" fill="none">
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeOpacity="0.3"/>
-                  <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/>
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeOpacity="0.3" />
+                  <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
                 </svg>
                 Submitting…
               </span>
@@ -362,34 +393,30 @@ export default function ReportIssuePage() {
           </button>
 
           {receipt?.id && (
-            <div className="rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
-              style={{ background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.25)" }}>
+            <div className="flex flex-col gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="text-sm font-semibold text-emerald-300">Issue submitted successfully</p>
-                <p className="text-xs text-emerald-200 mt-1">Token No: {receipt.issue_token || receipt.id}</p>
+                <p className="text-sm font-semibold text-emerald-700">Issue submitted successfully</p>
+                <p className="mt-1 text-xs text-emerald-700">Token No: {receipt.issue_token || receipt.id}</p>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
                   onClick={handleDownloadReceipt}
-                  className="px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5"
-                  style={{ background: "rgba(255,255,255,0.95)", color: "#065f46", border: "1px solid rgba(16,185,129,0.3)" }}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-white px-3 py-2 text-xs font-semibold text-emerald-700"
                 >
                   <Download size={14} /> Download PDF Receipt
                 </button>
                 <button
                   type="button"
                   onClick={() => navigate("/receipts")}
-                  className="px-3 py-2 rounded-xl text-xs font-semibold"
-                  style={{ background: "rgba(34,197,94,0.12)", color: "#166534", border: "1px solid rgba(34,197,94,0.3)" }}
+                  className="rounded-xl border border-emerald-200 bg-emerald-100 px-3 py-2 text-xs font-semibold text-emerald-700"
                 >
                   Go to Receipt Downloads
                 </button>
                 <button
                   type="button"
                   onClick={() => navigate("/dashboard")}
-                  className="px-3 py-2 rounded-xl text-xs font-semibold"
-                  style={{ background: "rgba(15,61,145,0.12)", color: "#0f3d91", border: "1px solid rgba(15,61,145,0.22)" }}
+                  className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700"
                 >
                   Go to Dashboard
                 </button>

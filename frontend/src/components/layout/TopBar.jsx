@@ -11,7 +11,7 @@ const PAGE_TITLES = {
 export function TopBar({ onMenuClick }) {
   const { user } = useAuth();
   const location = useLocation();
-  const title = PAGE_TITLES[location.pathname] ?? "CivicPortal";
+  const title = PAGE_TITLES[location.pathname] ?? "Civic Issue Portal";
 
   return (
     <header

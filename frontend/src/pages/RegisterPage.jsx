@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { Card } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
 import { MapPicker } from "../components/map/MapPicker";
@@ -141,160 +142,103 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen animated-bg flex">
-      {/* === LEFT PANEL === */}
-      <div className="hidden lg:flex flex-col flex-1 items-center justify-center p-12 relative overflow-hidden">
-        <div className="absolute top-10 right-10 w-64 h-64 rounded-full blur-3xl opacity-15"
-          style={{ background: "radial-gradient(circle, #1c5bbf, transparent)" }} />
-        <div className="absolute bottom-20 left-10 w-80 h-80 rounded-full blur-3xl opacity-10"
-          style={{ background: "radial-gradient(circle, #f59e0b, transparent)" }} />
-
-        <div className="relative z-10 max-w-sm animate-fade-up">
-          <div className="flex items-center gap-3 mb-10">
-            <div className="w-10 h-10 rounded-2xl flex items-center justify-center"
-              style={{ background: "linear-gradient(135deg, #0f3d91, #1c5bbf)" }}>
-              <Activity size={22} className="text-white" />
-            </div>
-            <span className="text-xl font-bold gradient-text">CivicPortal</span>
-          </div>
-
-          <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6"
-            style={{ background: "rgba(15,61,145,0.1)", border: "1px solid rgba(15,61,145,0.2)" }}>
-            <Users size={28} style={{ color: "#0f3d91" }} />
-          </div>
-
-          <h2 className="text-3xl font-black text-slate-800 mb-3">
-            Join <span className="gradient-text">50,000+</span> citizens
-          </h2>
-          <p className="text-slate-400 text-sm mb-8 leading-relaxed">
-            Making cities better, one report at a time. Create your free account and start making a difference today.
-          </p>
-
-          <div className="flex flex-col gap-3.5">
-            {perks.map((p, i) => (
-              <div key={i} className="flex items-center gap-3">
-                <CheckCircle2 size={16} style={{ color: "#0f3d91", shrink: 0 }} />
-                <p className="text-sm text-slate-300">{p}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* === RIGHT PANEL === */}
-      <div className="flex flex-1 items-center justify-center px-6 py-12 lg:max-w-2xl xl:max-w-3xl">
-        <div className="w-full max-w-2xl animate-fade-up delay-100">
-          {/* Mobile logo + back */}
-          <div className="lg:hidden flex items-center justify-between mb-8">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl flex items-center justify-center"
-                style={{ background: "linear-gradient(135deg, #0f3d91, #1c5bbf)" }}>
-                <Activity size={16} className="text-white" />
-              </div>
-              <span className="font-bold gradient-text">CivicPortal</span>
-            </div>
-            <Link to="/" className="text-xs text-slate-500 hover:text-slate-700 transition-colors">← Home</Link>
-          </div>
-
-          {/* Desktop back link */}
-          <div className="hidden lg:block mb-6">
-            <Link to="/" className="text-xs text-slate-500 hover:text-slate-700 transition-colors">← Back to Home</Link>
-          </div>
-
-          <div className="mb-8">
-            <h1 className="text-2xl font-bold text-slate-800">Create account</h1>
-            <p className="text-slate-500 mt-1 text-sm">Free forever. No credit card needed.</p>
-          </div>
-
-          <div className="glass-strong rounded-2xl p-7"
-            style={{ border: "1px solid rgba(15,61,145,0.14)" }}>
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-              <Input
-                label="Full Name"
-                type="text"
-                placeholder="John Doe"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                required
-              />
-              <Input
-                label="Email Address"
-                type="email"
-                placeholder="you@example.com"
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                required
-              />
-              <Input
-                label="Address"
-                type="text"
-                placeholder="Enter your Thane address"
-                value={form.address}
-                onChange={(e) => setForm({ ...form, address: e.target.value })}
-                required
-              />
-              <Input
-                label="Pincode"
-                type="text"
-                placeholder="e.g. 400601"
-                value={form.pincode}
-                onChange={(e) => setForm({ ...form, pincode: e.target.value.replace(/\D/g, "").slice(0, 6) })}
-                error={pincodeError}
-                required
-              />
-              <div className="rounded-xl border border-slate-600/40 p-3 space-y-3" style={{ background: "rgba(15,61,145,0.04)" }}>
-                <div className="flex items-center justify-between">
-                  <p className="text-xs text-slate-400">Pick your location in Thane (required for registration)</p>
-                  <button
-                    type="button"
-                    onClick={handleGeolocate}
-                    className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg"
-                    style={{ background: "rgba(15,61,145,0.1)", border: "1px solid rgba(15,61,145,0.2)", color: "#0f3d91" }}
-                  >
-                    <Navigation size={12} /> Use My Location
-                  </button>
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50/60 to-amber-50/40">
+      <div className="w-full px-4 py-6 md:px-8">
+        <Card className="overflow-hidden border border-slate-200/70">
+          <div className="bg-[radial-gradient(circle_at_top_left,rgba(15,61,145,0.14),transparent_28%),linear-gradient(135deg,rgba(255,255,255,0.98),rgba(248,250,252,0.92))] p-6 md:p-8">
+            <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
+              <div className="max-w-2xl space-y-5">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-linear-to-br from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-200">
+                    <Activity size={22} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">Civic Issue Portal</p>
+                    <p className="text-xs text-slate-500">Citizen registration</p>
+                  </div>
                 </div>
-                <MapPicker
-                  lat={form.latitude}
-                  lng={form.longitude}
-                  address={form.address}
-                  onLocationSelect={handleLocationSelect}
-                  onInvalidLocation={(msg) => toast.error(msg)}
-                />
+
+                <div className="space-y-3">
+                  <h1 className="text-4xl font-semibold tracking-tight text-slate-900 md:text-6xl">Join</h1>
+                  <p className="text-4xl font-semibold tracking-tight text-blue-700 md:text-6xl">50,000+ citizens</p>
+                </div>
+
+                <p className="max-w-2xl text-sm leading-7 text-slate-600 md:text-base">
+                  Making cities better, one report at a time. Create your free account and start making a difference today.
+                </p>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {perks.map((p) => (
+                    <div key={p} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                      <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                        <CheckCircle2 size={18} />
+                      </div>
+                      <p className="text-sm text-slate-700">{p}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <Input
-                label="Password"
-                type="password"
-                placeholder="Min. 6 characters"
-                value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
-                required
-              />
-              <Input
-                label="Confirm Password"
-                type="password"
-                placeholder="Repeat password"
-                value={form.confirm}
-                onChange={(e) => setForm({ ...form, confirm: e.target.value })}
-                required
-              />
 
-              <Button type="submit" loading={loading} size="lg" className="w-full mt-2">
-                Create Account
-                {!loading && <ArrowRight size={16} />}
-              </Button>
-            </form>
+              <div className="w-full max-w-2xl">
+                <div className="mb-4 flex items-center justify-between text-xs text-slate-500">
+                  <Link to="/" className="hover:text-slate-700 transition-colors">← Back to Home</Link>
+                  <Link to="/login" className="hover:text-slate-700 transition-colors">Sign in</Link>
+                </div>
 
-            <div className="mt-5 text-center">
-              <p className="text-slate-500 text-sm">
-                Already have an account?{" "}
-                <Link to="/login" className="font-medium" style={{ color: "#0f3d91" }}>
-                  Sign in
-                </Link>
-              </p>
+                <Card className="border border-slate-200/70 p-6 md:p-7">
+                  <div className="mb-6">
+                    <h2 className="text-2xl font-semibold text-slate-900">Create account</h2>
+                    <p className="mt-1 text-sm text-slate-500">Free forever. No credit card needed.</p>
+                  </div>
+
+                  <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                    <Input label="Full Name" type="text" placeholder="John Doe" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+                    <Input label="Email Address" type="email" placeholder="you@example.com" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
+                    <Input label="Address" type="text" placeholder="Enter your Thane address" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} required />
+                    <Input label="Pincode" type="text" placeholder="e.g. 400601" value={form.pincode} onChange={(e) => setForm({ ...form, pincode: e.target.value.replace(/\D/g, "").slice(0, 6) })} error={pincodeError} required />
+
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                      <div className="mb-3 flex items-center justify-between gap-3">
+                        <p className="text-xs text-slate-500">Pick your location in Thane (required for registration)</p>
+                        <button
+                          type="button"
+                          onClick={handleGeolocate}
+                          className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-700"
+                        >
+                          <Navigation size={12} /> Use My Location
+                        </button>
+                      </div>
+                      <MapPicker
+                        lat={form.latitude}
+                        lng={form.longitude}
+                        address={form.address}
+                        onLocationSelect={handleLocationSelect}
+                        onInvalidLocation={(msg) => toast.error(msg)}
+                      />
+                    </div>
+
+                    <Input label="Password" type="password" placeholder="Min. 6 characters" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required />
+                    <Input label="Confirm Password" type="password" placeholder="Repeat password" value={form.confirm} onChange={(e) => setForm({ ...form, confirm: e.target.value })} required />
+
+                    <Button type="submit" loading={loading} size="lg" className="mt-2 w-full">
+                      Create Account
+                      {!loading && <ArrowRight size={16} />}
+                    </Button>
+                  </form>
+
+                  <div className="mt-5 text-center">
+                    <p className="text-sm text-slate-500">
+                      Already have an account?{" "}
+                      <Link to="/login" className="font-medium text-blue-700 hover:text-blue-800">
+                        Sign in
+                      </Link>
+                    </p>
+                  </div>
+                </Card>
+              </div>
             </div>
           </div>
-        </div>
+        </Card>
       </div>
     </div>
   );

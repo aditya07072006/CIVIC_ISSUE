@@ -1,4 +1,6 @@
 import { Link } from "react-router-dom";
+import { Card } from "../components/ui/Card";
+import { Badge } from "../components/ui/Badge";
 import {
   MapPin, Shield, Zap, Users, BarChart3, CheckCircle, ArrowRight,
   AlertTriangle, Droplets, Lightbulb, Trash2, Construction, Star,
@@ -31,7 +33,7 @@ const STATS = [
 
 export default function LandingPage() {
   return (
-    <div className="animated-bg min-h-screen overflow-x-hidden text-slate-100">
+    <div className="min-h-screen overflow-x-hidden bg-linear-to-br from-slate-50 via-blue-50/60 to-amber-50/40 text-slate-900">
       {/* Ambient orbs */}
       <div className="pointer-events-none fixed inset-0 z-0" aria-hidden>
         <div style={{position:"absolute",top:"-10%",left:"-10%",width:600,height:600,borderRadius:"50%",background:"radial-gradient(circle,rgba(15,61,145,0.08) 0%,transparent 70%)"}} />
@@ -39,91 +41,99 @@ export default function LandingPage() {
         <div style={{position:"absolute",bottom:"-10%",left:"30%",width:500,height:500,borderRadius:"50%",background:"radial-gradient(circle,rgba(15,61,145,0.05) 0%,transparent 70%)"}} />
       </div>
 
-      {/* ─── Navbar ─────────────────────────────────────── */}
-      <nav className="relative z-20 flex items-center justify-between px-6 md:px-12 py-5 border-b border-white/5"
-        style={{background:"rgba(255,255,255,0.92)",backdropFilter:"blur(20px)"}}>
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-            style={{background:"linear-gradient(135deg,#0f3d91,#1c5bbf)"}}>
-            <MapPin size={16} className="text-white" />
-          </div>
-          <span className="font-bold text-lg gradient-text">CivicPortal</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <Link to="/login"
-            className="px-4 py-1.5 rounded-xl text-sm font-medium text-slate-700 hover:text-slate-900 transition-colors"
-            style={{border:"1px solid rgba(15,61,145,0.2)"}}>
-            Sign In
-          </Link>
-          <Link to="/register"
-            className="px-4 py-1.5 rounded-xl text-sm font-semibold text-white transition-all"
-            style={{background:"linear-gradient(135deg,#0f3d91,#1c5bbf)",boxShadow:"0 10px 24px rgba(15,61,145,0.2)"}}>
-            Get Started
-          </Link>
-        </div>
-      </nav>
-
-      {/* ─── Hero ────────────────────────────────────────── */}
-      <section className="relative z-10 text-center px-4 pt-24 pb-20">
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mb-6"
-          style={{background:"rgba(15,61,145,0.08)",border:"1px solid rgba(15,61,145,0.2)",color:"#0f3d91"}}>
-          <Zap size={11} /> Now serving 50+ municipal wards
-        </div>
-        <h1 className="text-4xl md:text-6xl lg:text-7xl font-black mb-6 leading-tight tracking-tight">
-          Your City, Your Voice.
-          <br />
-          <span className="gradient-text">Report. Track. Resolve.</span>
-        </h1>
-        <p className="text-slate-400 text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
-          CivicPortal connects citizens directly with municipal authorities. Report civic issues 
-          with photo evidence, track resolution in real-time, and help build a better city — together.
-        </p>
-        <div className="flex items-center justify-center gap-4 flex-wrap">
-          <Link to="/register"
-            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-2xl font-bold text-white text-base transition-all hover:scale-105"
-            style={{background:"linear-gradient(135deg,#0f3d91,#1c5bbf)",boxShadow:"0 12px 28px rgba(15,61,145,0.24)"}}>
-            Report an Issue <ArrowRight size={18} />
-          </Link>
-          <Link to="/login"
-            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-2xl font-semibold text-slate-700 hover:text-slate-900 text-base transition-all"
-            style={{background:"rgba(255,255,255,0.96)",border:"1px solid rgba(15,61,145,0.2)"}}>
-            Sign In to Dashboard
-          </Link>
-        </div>
-      </section>
-
-      {/* ─── Stats ───────────────────────────────────────── */}
-      <section className="relative z-10 max-w-5xl mx-auto px-4 pb-20">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {STATS.map((s) => (
-            <div key={s.label} className="glass-strong rounded-2xl p-6 text-center">
-              <p className="text-3xl md:text-4xl font-black gradient-text mb-1">{s.value}</p>
-              <p className="text-slate-400 text-sm">{s.label}</p>
+      <div className="relative z-10 px-4 py-4 md:px-6">
+        <Card className="w-full border border-slate-200/70 px-5 py-4 shadow-sm">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-linear-to-br from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-200">
+                <MapPin size={18} />
+              </div>
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">Civic Issue Portal</p>
+                <p className="text-xs text-slate-500">Report. Track. Resolve.</p>
+              </div>
             </div>
-          ))}
+            <div className="flex items-center gap-3">
+              <Link
+                to="/login"
+                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
+              >
+                Sign In
+              </Link>
+              <Link
+                to="/register"
+                className="rounded-xl bg-linear-to-r from-blue-600 to-cyan-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-blue-200 transition-transform hover:-translate-y-0.5"
+              >
+                Get Started
+              </Link>
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      <section className="relative z-10 px-4 pb-20 pt-14 md:pt-20">
+        <div className="w-full">
+          <Card className="overflow-hidden border border-slate-200/70">
+            <div className="bg-[radial-gradient(circle_at_top_left,rgba(15,61,145,0.14),transparent_28%),linear-gradient(135deg,rgba(255,255,255,0.98),rgba(248,250,252,0.92))] px-6 py-10 md:px-10 md:py-14">
+              <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
+                <div className="max-w-3xl space-y-5 text-center lg:text-left">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
+                    <Zap size={11} /> Now serving 50+ municipal wards
+                  </div>
+                  <div className="space-y-4">
+                    <h1 className="text-4xl font-semibold tracking-tight text-slate-900 md:text-6xl lg:text-7xl">
+                      Your City, Your Voice.
+                    </h1>
+                    <p className="text-4xl font-semibold tracking-tight text-blue-700 md:text-5xl lg:text-6xl">
+                      Report. Track. Resolve.
+                    </p>
+                  </div>
+                  <p className="mx-auto max-w-2xl text-sm leading-7 text-slate-600 md:text-lg lg:mx-0">
+                    Civic Issue Portal connects citizens directly with municipal authorities. Report civic issues with photo evidence, track resolution in real-time, and help build a better city together.
+                  </p>
+                  <div className="flex flex-wrap items-center justify-center gap-4 lg:justify-start">
+                    <Link to="/register" className="inline-flex items-center gap-2 rounded-2xl bg-linear-to-r from-blue-600 to-cyan-600 px-6 py-3.5 text-base font-semibold text-white shadow-lg shadow-blue-200 transition-transform hover:-translate-y-0.5">
+                      Report an Issue <ArrowRight size={18} />
+                    </Link>
+                    <Link to="/login" className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-6 py-3.5 text-base font-semibold text-slate-700 transition-colors hover:bg-slate-50">
+                      Sign In to Dashboard
+                    </Link>
+                  </div>
+                </div>
+
+                <div className="grid w-full gap-4 sm:grid-cols-2 lg:max-w-xl">
+                  {STATS.map((s) => (
+                    <div key={s.label} className="glass-strong rounded-3xl border border-white/70 p-5 shadow-sm">
+                      <p className="text-xs font-medium uppercase tracking-[0.18em] text-slate-500">{s.label}</p>
+                      <p className="mt-3 text-3xl font-semibold text-slate-900">{s.value}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </Card>
         </div>
       </section>
 
       {/* ─── Features ────────────────────────────────────── */}
       <section className="relative z-10 max-w-6xl mx-auto px-4 pb-24">
         <div className="text-center mb-12">
-          <p className="text-xs font-semibold uppercase tracking-widest text-blue-700 mb-3">Features</p>
-          <h2 className="text-3xl md:text-4xl font-bold text-slate-100 mb-3">Everything you need to make change</h2>
-          <p className="text-slate-400 max-w-xl mx-auto">From reporting to resolution, we make civic engagement simple, transparent, and impactful.</p>
+          <Badge variant="resolved">Features</Badge>
+          <h2 className="mt-4 text-3xl font-semibold text-slate-900 md:text-4xl">Everything you need to make change</h2>
+          <p className="mx-auto mt-3 max-w-xl text-slate-600">From reporting to resolution, we make civic engagement simple, transparent, and impactful.</p>
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {FEATURES.map((feat) => {
             const FeatureIcon = feat.icon;
             return (
-              <div key={feat.title} className="glass rounded-2xl p-6 group hover:border-white/15 transition-all"
-                style={{border:"1px solid rgba(15,61,145,0.14)"}}>
+              <Card key={feat.title} className="border border-slate-200/70 p-6 transition-transform duration-200 hover:-translate-y-1 hover:shadow-2xl">
                 <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110"
                   style={{background:`${feat.color}18`,border:`1px solid ${feat.color}30`}}>
                   <FeatureIcon size={22} style={{color:feat.color}} />
                 </div>
-                <h3 className="font-semibold text-slate-100 mb-1.5">{feat.title}</h3>
-                <p className="text-slate-400 text-sm leading-relaxed">{feat.desc}</p>
-              </div>
+                <h3 className="mb-1.5 font-semibold text-slate-900">{feat.title}</h3>
+                <p className="text-sm leading-relaxed text-slate-600">{feat.desc}</p>
+              </Card>
             );
           })}
         </div>
@@ -132,21 +142,20 @@ export default function LandingPage() {
       {/* ─── Categories ──────────────────────────────────── */}
       <section className="relative z-10 max-w-5xl mx-auto px-4 pb-24">
         <div className="text-center mb-10">
-          <p className="text-xs font-semibold uppercase tracking-widest text-blue-700 mb-3">Issue Categories</p>
-          <h2 className="text-3xl font-bold text-slate-100">We cover every type of civic problem</h2>
+          <Badge variant="pending">Issue Categories</Badge>
+          <h2 className="mt-4 text-3xl font-semibold text-slate-900">We cover every type of civic problem</h2>
         </div>
         <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
           {CATEGORIES.map((cat) => {
             const CatIcon = cat.icon;
             return (
-              <div key={cat.label} className="glass rounded-2xl p-4 flex flex-col items-center gap-2.5 text-center group hover:scale-105 transition-all cursor-default"
-                style={{border:"1px solid rgba(15,61,145,0.14)"}}>
+              <Card key={cat.label} className="flex cursor-default flex-col items-center gap-2.5 rounded-2xl border border-slate-200/70 p-4 text-center transition-transform duration-200 hover:-translate-y-1">
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center"
                   style={{background:`${cat.color}18`,border:`1px solid ${cat.color}30`}}>
                   <CatIcon size={20} style={{color:cat.color}} />
                 </div>
-                <span className="text-xs font-medium text-slate-300">{cat.label}</span>
-              </div>
+                <span className="text-xs font-medium text-slate-700">{cat.label}</span>
+              </Card>
             );
           })}
         </div>
@@ -155,8 +164,8 @@ export default function LandingPage() {
       {/* ─── How it works ────────────────────────────────── */}
       <section className="relative z-10 max-w-5xl mx-auto px-4 pb-24">
         <div className="text-center mb-12">
-          <p className="text-xs font-semibold uppercase tracking-widest text-amber-600 mb-3">How It Works</p>
-          <h2 className="text-3xl font-bold text-slate-100">Three simple steps</h2>
+          <Badge variant="pending">How It Works</Badge>
+          <h2 className="mt-4 text-3xl font-semibold text-slate-900">Three simple steps</h2>
         </div>
         <div className="grid md:grid-cols-3 gap-6">
           {[
@@ -164,12 +173,12 @@ export default function LandingPage() {
             { step: "02", title: "Report the issue", desc: "Fill in the details, attach a photo, and pin the exact location on the map." },
             { step: "03", title: "Track resolution", desc: "Watch real-time status updates as the team investigates and resolves your issue." },
           ].map(({ step, title, desc }) => (
-            <div key={step} className="glass-strong rounded-2xl p-7 relative overflow-hidden">
+            <Card key={step} className="relative overflow-hidden border border-slate-200/70 p-7">
               <span className="absolute top-4 right-5 text-5xl font-black text-white/3 select-none">{step}</span>
-              <div className="text-xs font-bold text-blue-700 mb-3 uppercase tracking-widest">{step}</div>
-              <h3 className="font-bold text-slate-100 text-lg mb-2">{title}</h3>
-              <p className="text-slate-400 text-sm leading-relaxed">{desc}</p>
-            </div>
+              <div className="mb-3 text-xs font-bold uppercase tracking-widest text-blue-700">{step}</div>
+              <h3 className="mb-2 text-lg font-semibold text-slate-900">{title}</h3>
+              <p className="text-sm leading-relaxed text-slate-600">{desc}</p>
+            </Card>
           ))}
         </div>
       </section>
@@ -177,8 +186,8 @@ export default function LandingPage() {
       {/* ─── Testimonials ────────────────────────────────── */}
       <section className="relative z-10 max-w-5xl mx-auto px-4 pb-24">
         <div className="text-center mb-12">
-          <p className="text-xs font-semibold uppercase tracking-widest text-green-700 mb-3">Community</p>
-          <h2 className="text-3xl font-bold text-slate-100">Trusted by thousands of citizens</h2>
+          <Badge variant="resolved">Community</Badge>
+          <h2 className="mt-4 text-3xl font-semibold text-slate-900">Trusted by thousands of citizens</h2>
         </div>
         <div className="grid md:grid-cols-3 gap-5">
           {[
@@ -186,59 +195,55 @@ export default function LandingPage() {
             { name: "Rahul Menon", ward: "Ward 7", msg: "The pothole that caused accidents for months got fixed after I reported here.", rating: 5 },
             { name: "Anita Joshi", ward: "Ward 23", msg: "Finally a way to actually be heard. My garbage overflow complaint was resolved in 48hrs.", rating: 5 },
           ].map(({ name, ward, msg, rating }) => (
-            <div key={name} className="glass rounded-2xl p-6 flex flex-col gap-3">
+            <Card key={name} className="flex flex-col gap-3 border border-slate-200/70 p-6">
               <div className="flex gap-0.5">
                 {Array.from({length: rating}).map((_, i) => (
                   <Star key={i} size={14} className="fill-amber-400 text-amber-400" />
                 ))}
               </div>
-              <p className="text-slate-300 text-sm leading-relaxed italic">"{msg}"</p>
-              <div className="mt-auto pt-2 border-t border-white/5">
-                <p className="font-semibold text-slate-100 text-sm">{name}</p>
-                <p className="text-slate-500 text-xs">{ward}</p>
+              <p className="text-sm leading-relaxed italic text-slate-600">"{msg}"</p>
+              <div className="mt-auto border-t border-slate-200 pt-2">
+                <p className="text-sm font-semibold text-slate-900">{name}</p>
+                <p className="text-xs text-slate-500">{ward}</p>
               </div>
-            </div>
+            </Card>
           ))}
         </div>
       </section>
 
       {/* ─── CTA ─────────────────────────────────────────── */}
       <section className="relative z-10 max-w-4xl mx-auto px-4 pb-20">
-        <div className="glass-strong rounded-3xl p-10 md:p-14 text-center relative overflow-hidden">
+        <Card className="overflow-hidden border border-slate-200/70 p-10 text-center md:p-14 relative">
           <div className="pointer-events-none absolute inset-0"
             style={{background:"radial-gradient(ellipse at center,rgba(15,61,145,0.09) 0%,transparent 70%)"}} />
-          <h2 className="text-3xl md:text-4xl font-black text-slate-100 mb-4 relative z-10">
+          <h2 className="relative z-10 mb-4 text-3xl font-semibold text-slate-900 md:text-4xl">
             Ready to make your city better?
           </h2>
-          <p className="text-slate-400 mb-8 max-w-lg mx-auto relative z-10">
+          <p className="relative z-10 mx-auto mb-8 max-w-lg text-slate-600">
             Join thousands of active citizens. Registration is free, instant, and takes less than a minute.
           </p>
           <div className="flex items-center justify-center gap-4 flex-wrap relative z-10">
             <Link to="/register"
-              className="inline-flex items-center gap-2 px-8 py-3.5 rounded-2xl font-bold text-white text-base transition-all hover:scale-105"
-              style={{background:"linear-gradient(135deg,#0f3d91,#1c5bbf)",boxShadow:"0 12px 28px rgba(15,61,145,0.24)"}}>
+              className="inline-flex items-center gap-2 rounded-2xl bg-linear-to-r from-blue-600 to-cyan-600 px-8 py-3.5 text-base font-semibold text-white shadow-lg shadow-blue-200 transition-transform hover:-translate-y-0.5">
               Get Started Free <ArrowRight size={18} />
             </Link>
             <Link to="/login"
-              className="inline-flex items-center gap-2 px-8 py-3.5 rounded-2xl font-semibold text-slate-700 hover:text-slate-900 text-base transition-all"
-              style={{background:"rgba(255,255,255,0.96)",border:"1px solid rgba(15,61,145,0.2)"}}>
+              className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-8 py-3.5 text-base font-semibold text-slate-700 transition-colors hover:bg-slate-50">
               Sign In
             </Link>
           </div>
-        </div>
+        </Card>
       </section>
 
       {/* ─── Footer ──────────────────────────────────────── */}
-      <footer className="relative z-10 border-t border-white/5 px-6 py-8 text-center text-xs text-slate-500"
-        style={{background:"rgba(255,255,255,0.9)"}}>
+      <footer className="relative z-10 border-t border-slate-200 bg-white/90 px-6 py-8 text-center text-xs text-slate-500 backdrop-blur-sm">
         <div className="flex items-center justify-center gap-2 mb-2">
-          <div className="w-6 h-6 rounded-md flex items-center justify-center"
-            style={{background:"linear-gradient(135deg,#0f3d91,#1c5bbf)"}}>
+          <div className="flex h-6 w-6 items-center justify-center rounded-md bg-linear-to-br from-blue-600 to-cyan-600">
             <MapPin size={12} className="text-white" />
           </div>
-          <span className="font-semibold text-slate-400">CivicPortal</span>
+          <span className="font-semibold text-slate-700">Civic Issue Portal</span>
         </div>
-        <p>© {new Date().getFullYear()} CivicPortal · Empowering citizens, improving cities</p>
+        <p>© {new Date().getFullYear()} Civic Issue Portal · Empowering citizens, improving cities</p>
       </footer>
     </div>
   );

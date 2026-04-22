@@ -1,5 +1,6 @@
 ﻿import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { Card } from "../components/ui/Card";
 import { Badge } from "../components/ui/Badge";
 import { Modal } from "../components/ui/Modal";
 import { useAuth } from "../context/AuthContext";
@@ -111,42 +112,46 @@ export default function CitizenDashboard() {
   const SEVERITY_COLORS = { low: "#10b981", medium: "#f59e0b", high: "#f97316", critical: "#ef4444" };
 
   return (
-    <div className="animated-bg min-h-screen relative">
+    <div className="min-h-screen relative bg-linear-to-br from-slate-50 via-blue-50/60 to-amber-50/40">
       {/* Ambient orbs */}
       <div className="pointer-events-none fixed inset-0 z-0" aria-hidden>
         <div style={{position:"absolute",top:"5%",right:"10%",width:350,height:350,borderRadius:"50%",background:"radial-gradient(circle,rgba(15,61,145,0.08) 0%,transparent 70%)"}} />
         <div style={{position:"absolute",bottom:"20%",left:"5%",width:280,height:280,borderRadius:"50%",background:"radial-gradient(circle,rgba(245,158,11,0.08) 0%,transparent 70%)"}} />
       </div>
 
-      <div className="relative z-10 max-w-5xl mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <p className="text-slate-600 text-sm mb-1">Welcome back</p>
-            <h1 className="text-2xl font-bold gradient-text">{user?.name}</h1>
+      <div className="relative z-10 w-full px-4 py-6 md:px-6">
+        <Card className="overflow-hidden border border-slate-200/70 mb-6">
+          <div className="bg-[radial-gradient(circle_at_top_left,rgba(15,61,145,0.14),transparent_28%),linear-gradient(135deg,rgba(255,255,255,0.98),rgba(248,250,252,0.92))] p-6 md:p-8">
+            <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+              <div className="space-y-3">
+                <Badge variant="resolved">Citizen dashboard</Badge>
+                <div>
+                  <p className="text-sm font-medium text-slate-500">Welcome back</p>
+                  <h1 className="mt-1 text-3xl font-semibold tracking-tight text-slate-900 md:text-5xl">{user?.name}</h1>
+                </div>
+                <p className="max-w-2xl text-sm leading-6 text-slate-600 md:text-base">
+                  Track your reports, review progress, and jump into a new issue submission when needed.
+                </p>
+              </div>
+              <Link to="/report" className="inline-flex items-center gap-2 rounded-2xl bg-linear-to-r from-blue-600 to-cyan-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-200 transition-transform hover:-translate-y-0.5">
+                <Plus size={16} /> Report Issue
+              </Link>
+            </div>
           </div>
-          <Link to="/report">
-            <button
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm text-white transition-all hover:scale-105"
-              style={{background:"linear-gradient(135deg,#0f3d91,#1c5bbf)",boxShadow:"0 0 24px rgba(15,61,145,0.28)"}}>
-              <Plus size={16} /> Report Issue
-            </button>
-          </Link>
-        </div>
+        </Card>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           {STAT_CARDS.map((s) => (
-            <div key={s.label} className="glass-strong rounded-2xl p-5 text-center"
-              style={{border:`1px solid ${s.border}`}}>
+            <Card key={s.label} className="rounded-2xl p-5 text-center border border-slate-200/70">
               <p className="text-3xl font-black mb-1" style={{color:s.color}}>{s.value}</p>
               <p className="text-slate-600 text-xs font-medium">{s.label}</p>
-            </div>
+            </Card>
           ))}
         </div>
 
         {/* Filters */}
-        <div className="glass-strong rounded-2xl p-4 mb-6 flex gap-3 flex-wrap items-center">
+        <Card className="border border-slate-200/70 p-4 mb-6">
+          <div className="flex gap-3 flex-wrap items-center">
           <div className="flex-1 min-w-48 relative">
             <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
             <input
@@ -172,29 +177,28 @@ export default function CitizenDashboard() {
           </select>
           <button
             onClick={fetchIssues}
-            className="px-4 py-2 rounded-xl text-sm font-medium text-blue-700 transition-all hover:text-blue-900"
-            style={{background:"rgba(15,61,145,0.1)",border:"1px solid rgba(15,61,145,0.2)"}}>
+            className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50">
             <RefreshCcw size={14} />
           </button>
-        </div>
+          </div>
+        </Card>
 
         {/* Issues List */}
         {loading ? (
-          <div className="text-center py-20 text-slate-500">
+          <Card className="border border-slate-200/70 p-10 text-center text-slate-500">
             <div className="w-8 h-8 border-2 border-blue-700/20 border-t-blue-700 rounded-full animate-spin mx-auto mb-4" />
             Loading issues…
-          </div>
+          </Card>
         ) : filtered.length === 0 ? (
-          <div className="glass-strong rounded-2xl text-center py-16 px-4">
+          <Card className="border border-slate-200/70 text-center py-16 px-4">
             <AlertCircle size={40} className="text-slate-600 mx-auto mb-3" />
-            <p className="text-slate-400 mb-5">No issues found</p>
+            <p className="text-slate-500 mb-5">No issues found</p>
             <Link to="/report">
-              <button className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl font-semibold text-sm text-white"
-                style={{background:"linear-gradient(135deg,#0f3d91,#1c5bbf)"}}>
+              <button className="inline-flex items-center gap-2 rounded-xl bg-linear-to-r from-blue-600 to-cyan-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-200">
                 <Plus size={15} /> Report Your First Issue
               </button>
             </Link>
-          </div>
+          </Card>
         ) : (
           <div className="flex flex-col gap-3">
             {filtered.map((issue) => {
@@ -202,8 +206,8 @@ export default function CitizenDashboard() {
               return (
                 <div
                   key={issue.id}
-                  className="glass rounded-2xl cursor-pointer transition-all hover:scale-[1.01] overflow-hidden"
-                  style={{border:"1px solid rgba(15,61,145,0.14)",borderLeft:`3px solid ${sevColor}`}}
+                  className="overflow-hidden rounded-2xl cursor-pointer border border-slate-200/70 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-2xl"
+                  style={{borderLeft:`3px solid ${sevColor}`}}
                   onClick={() => openDetail(issue.id)}
                 >
                   <div className="p-4 flex items-start gap-4">
@@ -261,7 +265,7 @@ export default function CitizenDashboard() {
                     </div>
                   </div>
                   {/* Status progress bar */}
-                  <div className="h-0.5 w-full" style={{background:"rgba(15,61,145,0.08)"}}>
+                  <div className="h-0.5 w-full bg-slate-200">
                     <div className="h-full rounded-full transition-all"
                       style={{
                         width: issue.status === "resolved" ? "100%" : issue.status === "in_progress" ? "60%" : issue.status === "rejected" ? "100%" : "20%",
@@ -295,36 +299,35 @@ export default function CitizenDashboard() {
                 className="w-full rounded-xl max-h-64 object-cover ring-1 ring-white/10" />
             )}
             <div className="flex items-start justify-between gap-3 flex-wrap">
-              <h2 className="text-xl font-bold text-slate-800">{detail.title}</h2>
+              <h2 className="text-xl font-semibold text-slate-900">{detail.title}</h2>
               <div className="flex gap-2">
                 <Badge variant={detail.severity}>{detail.severity}</Badge>
                 <Badge variant={detail.status}>{detail.status.replace("_", " ")}</Badge>
               </div>
             </div>
-            <p className="text-slate-700 text-sm leading-relaxed">{detail.description}</p>
+            <p className="text-slate-600 text-sm leading-relaxed">{detail.description}</p>
             <div className="grid grid-cols-2 gap-3 text-sm">
               {[
                 { label: "Category", value: detail.category.replace("_", " "), cap: true },
                 { label: "Reported", value: formatDate(detail.created_at) },
                 { label: "SLA", value: `${detail.sla_hours}h expected` },
               ].filter(Boolean).map((item) => (
-                <div key={item.label} className="rounded-xl p-3"
-                  style={{background:"rgba(255,255,255,0.96)",border:"1px solid rgba(15,61,145,0.14)"}}>
+                <div key={item.label} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
                   <p className="text-slate-500 text-xs mb-0.5">{item.label}</p>
-                  <p className={`text-slate-700 font-medium ${item.small ? "text-xs" : ""} ${item.cap ? "capitalize" : ""}`}>{item.value}</p>
+                  <p className={`text-slate-800 font-medium ${item.small ? "text-xs" : ""} ${item.cap ? "capitalize" : ""}`}>{item.value}</p>
                 </div>
               ))}
             </div>
 
             {/* Location Details */}
             {(detail.latitude && detail.longitude) && (
-              <div className="rounded-xl p-4" style={{background:"rgba(34,211,238,0.05)",border:"1px solid rgba(34,211,238,0.2)"}}>
-                <p className="text-slate-400 text-xs font-medium uppercase tracking-wide mb-2">📍 Location</p>
+              <div className="rounded-xl border border-cyan-200 bg-cyan-50/70 p-4">
+                <p className="mb-2 text-xs font-medium uppercase tracking-wide text-cyan-700">Location</p>
                 <div className="space-y-1">
                   {detail.address && (
-                    <p className="text-slate-800 text-sm font-medium">{detail.address}</p>
+                    <p className="text-sm font-medium text-slate-900">{detail.address}</p>
                   )}
-                  <p className="text-slate-400 text-xs">
+                  <p className="text-xs text-slate-500">
                     Coordinates: {parseFloat(detail.latitude).toFixed(6)}, {parseFloat(detail.longitude).toFixed(6)}
                   </p>
                 </div>
@@ -332,7 +335,7 @@ export default function CitizenDashboard() {
             )}
             {detail.timeline?.length > 0 && (
               <div>
-                <h4 className="text-sm font-semibold text-slate-700 mb-3">Activity Timeline</h4>
+                <h4 className="mb-3 text-sm font-semibold text-slate-900">Activity Timeline</h4>
                 <div className="flex flex-col gap-2">
                   {detail.timeline.map((t, i) => (
                     <div key={i} className="flex items-start gap-3">

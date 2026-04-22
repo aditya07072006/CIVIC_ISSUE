@@ -113,6 +113,85 @@ def _ensure_location_and_token_columns():
     finally:
         db.close()
 
+
+def _ensure_department_tables():
+    from database import get_db
+    db = get_db()
+    try:
+        with db.cursor() as cursor:
+            # Create departments table
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS departments (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    name VARCHAR(100) NOT NULL UNIQUE,
+                    description TEXT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+                )
+            """)
+
+            # Create sub_departments table
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS sub_departments (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    department_id INT NOT NULL,
+                    name VARCHAR(100) NOT NULL,
+                    description TEXT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE CASCADE,
+                    UNIQUE KEY uniq_dept_subdept (department_id, name)
+                )
+            """)
+
+            # Add department_id and sub_department_id to issues table
+            if not _column_exists(cursor, "issues", "department_id"):
+                cursor.execute("ALTER TABLE issues ADD COLUMN department_id INT NULL")
+                cursor.execute("ALTER TABLE issues ADD FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE SET NULL")
+
+            if not _column_exists(cursor, "issues", "sub_department_id"):
+                cursor.execute("ALTER TABLE issues ADD COLUMN sub_department_id INT NULL")
+                cursor.execute("ALTER TABLE issues ADD FOREIGN KEY (sub_department_id) REFERENCES sub_departments(id) ON DELETE SET NULL")
+
+            # Insert default departments and sub-departments
+            cursor.execute("SELECT COUNT(*) as count FROM departments")
+            if cursor.fetchone()["count"] == 0:
+                dept_data = [
+                    ("Infrastructure", "Roads, drainage, streetlights"),
+                    ("Sanitation", "Garbage collection, waste management"),
+                    ("Water Supply", "Water leakage, supply issues"),
+                    ("Parks & Recreation", "Parks maintenance, public spaces"),
+                    ("Safety", "Street safety, security issues"),
+                ]
+                cursor.executemany("INSERT INTO departments (name, description) VALUES (%s, %s)", dept_data)
+
+                # Get inserted department IDs
+                cursor.execute("SELECT id, name FROM departments")
+                depts = cursor.fetchall()
+
+                # Map department names to their IDs for sub-department insertion
+                dept_map = {d['name']: d['id'] for d in depts}
+
+                sub_dept_data = [
+                    (dept_map.get("Infrastructure"), "Pothole", "Potholes and road defects"),
+                    (dept_map.get("Infrastructure"), "Road Damage", "Road surface damage"),
+                    (dept_map.get("Infrastructure"), "Streetlight", "Streetlight maintenance"),
+                    (dept_map.get("Infrastructure"), "Drainage", "Drainage system issues"),
+                    (dept_map.get("Sanitation"), "Garbage Overflow", "Garbage collection overflow"),
+                    (dept_map.get("Water Supply"), "Water Leakage", "Water pipeline leakage"),
+                    (dept_map.get("Parks & Recreation"), "Park Maintenance", "Park maintenance issues"),
+                    (dept_map.get("Safety"), "Security", "Public safety concerns"),
+                    (dept_map.get("Infrastructure"), "Other", "Other infrastructure issues"),
+                ]
+                cursor.executemany(
+                    "INSERT INTO sub_departments (department_id, name, description) VALUES (%s, %s, %s)",
+                    sub_dept_data
+                )
+
+            db.commit()
+    finally:
+        db.close()
+
 with app.app_context():
     try:
         _ensure_upvotes_table()
@@ -126,6 +205,10 @@ with app.app_context():
         _ensure_location_and_token_columns()
     except Exception as e:
         print(f"[WARN] Could not ensure location/token columns on startup: {e}")
+    try:
+        _ensure_department_tables()
+    except Exception as e:
+        print(f"[WARN] Could not create department tables on startup: {e}")
 
 app.register_blueprint(auth_bp, url_prefix="/api/auth")
 app.register_blueprint(issues_bp, url_prefix="/api/issues")

@@ -79,6 +79,7 @@ def login():
 
             identity = str(user["id"])
             token = create_access_token(identity=identity)
+            role_value = str(user["role"]).lower() if user.get("role") is not None else "citizen"
             return jsonify(
                 {
                     "token": token,
@@ -86,7 +87,7 @@ def login():
                         "id": user["id"],
                         "name": user["name"],
                         "email": user["email"],
-                        "role": user["role"],
+                        "role": role_value,
                     },
                 }
             ), 200

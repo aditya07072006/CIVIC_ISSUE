@@ -3,10 +3,10 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
 const THANE_CENTER = { lat: 19.2183, lng: 72.9781 };
-const THANE_RADIUS_METERS = 25000;
+const THANE_RADIUS_METERS = 18000;
 const THANE_BOUNDS = [
-  [18.99, 72.74],
-  [19.45, 73.22],
+  [19.11, 72.9],
+  [19.34, 73.08],
 ];
 
 function haversineMeters(lat1, lon1, lat2, lon2) {

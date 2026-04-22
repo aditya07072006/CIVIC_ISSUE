@@ -13,6 +13,8 @@ import ReceiptDownloadsPage from "./pages/ReceiptDownloadsPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import DeletedIssuesPage from "./pages/DeletedIssuesPage";
 import AdminFeedbackPage from "./pages/AdminFeedbackPage";
+import DepartmentPage from "./pages/DepartmentPage";
+import AllIssuesPage from "./pages/AllIssuesPage";
 
 function ProtectedRoute({ children, adminOnly = false }) {
   const { user } = useAuth();
@@ -93,6 +95,22 @@ function AppRoutes() {
         element={
           <ProtectedRoute adminOnly>
             <AppLayout><AdminFeedbackPage /></AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/all-issues"
+        element={
+          <ProtectedRoute adminOnly>
+            <AppLayout><AllIssuesPage /></AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/department"
+        element={
+          <ProtectedRoute adminOnly>
+            <AppLayout><DepartmentPage /></AppLayout>
           </ProtectedRoute>
         }
       />
