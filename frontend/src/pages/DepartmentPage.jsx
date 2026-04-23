@@ -21,6 +21,7 @@ import {
   Sparkles,
   ChevronRight,
   MapPinned,
+  Trash2,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -69,6 +70,9 @@ export default function DepartmentPage() {
   const [selectedIssue, setSelectedIssue] = useState(null);
   const [updateStatusModal, setUpdateStatusModal] = useState(false);
   const [newStatus, setNewStatus] = useState("");
+  const [issueDetail, setIssueDetail] = useState(null);
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [detailLoading, setDetailLoading] = useState(false);
   const [pageError, setPageError] = useState("");
 
   const fetchDepartments = useCallback(async () => {
@@ -221,6 +225,56 @@ export default function DepartmentPage() {
     } catch {
       toast.error("Failed to update status");
     }
+  };
+
+  const handleDeleteIssue = async (issue) => {
+    const confirmed = window.confirm(
+      `Delete issue #${issue.id}? This will move it to the deleted archive.`,
+    );
+    if (!confirmed) return;
+
+    try {
+      await api.delete(`/issues/${issue.id}`);
+      toast.success("Issue deleted successfully");
+
+      if (selectedIssue?.id === issue.id) {
+        setSelectedIssue(null);
+        setUpdateStatusModal(false);
+        setNewStatus("");
+      }
+
+      const subDeptId = issue.sub_department_id;
+      if (subDeptId) {
+        clearSubDeptCaches(subDeptId);
+        await fetchSubDepartmentIssues(subDeptId, true);
+      }
+      if (expandedSubDept && expandedSubDept !== subDeptId) {
+        fetchSubDepartmentIssues(expandedSubDept, true);
+      }
+      fetchDepartments();
+    } catch (err) {
+      const message = err.response?.data?.error || "Failed to delete issue";
+      toast.error(message);
+    }
+  };
+
+  const openIssueDetails = async (issueId) => {
+    setDetailLoading(true);
+    setDetailModalOpen(true);
+    try {
+      const res = await api.get(`/issues/${issueId}`);
+      setIssueDetail(res.data);
+    } catch {
+      toast.error("Failed to load issue details");
+      setDetailModalOpen(false);
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
+  const getIssueImageUrl = (image) => {
+    if (!image) return null;
+    return image.startsWith("http") ? image : `/uploads/${image}`;
   };
 
   if (loading) {
@@ -493,7 +547,7 @@ export default function DepartmentPage() {
                                             <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                                               <button
                                                 type="button"
-                                                onClick={() => setSelectedIssue(issue)}
+                                                onClick={() => openIssueDetails(issue.id)}
                                                 className="flex-1 text-left"
                                               >
                                                 <div className="flex items-center gap-2">
@@ -521,17 +575,29 @@ export default function DepartmentPage() {
                                                 </div>
                                               </button>
 
-                                              <button
-                                                onClick={(e) => {
-                                                  e.stopPropagation();
-                                                  setSelectedIssue(issue);
-                                                  setNewStatus(issue.status);
-                                                  setUpdateStatusModal(true);
-                                                }}
-                                                className="inline-flex items-center justify-center rounded-xl bg-linear-to-r from-blue-600 to-cyan-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-200 transition-transform hover:-translate-y-0.5"
-                                              >
-                                                Update Status
-                                              </button>
+                                              <div className="flex flex-col gap-2">
+                                                <button
+                                                  onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setSelectedIssue(issue);
+                                                    setNewStatus(issue.status);
+                                                    setUpdateStatusModal(true);
+                                                  }}
+                                                  className="inline-flex items-center justify-center rounded-xl bg-linear-to-r from-blue-600 to-cyan-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-200 transition-transform hover:-translate-y-0.5"
+                                                >
+                                                  Update Status
+                                                </button>
+                                                <button
+                                                  onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDeleteIssue(issue);
+                                                  }}
+                                                  className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm font-semibold text-rose-700 transition-colors hover:bg-rose-100"
+                                                >
+                                                  <Trash2 size={14} />
+                                                  Delete
+                                                </button>
+                                              </div>
                                             </div>
                                           </div>
                                         );
@@ -617,6 +683,68 @@ export default function DepartmentPage() {
               </button>
             </div>
           </div>
+        </Modal>
+      )}
+
+      {detailModalOpen && (
+        <Modal
+          open={detailModalOpen}
+          onClose={() => {
+            setDetailModalOpen(false);
+            setIssueDetail(null);
+          }}
+          title="Issue Details"
+        >
+          {detailLoading ? (
+            <div className="py-6 text-center text-sm text-slate-600">Loading issue details...</div>
+          ) : issueDetail ? (
+            <div className="space-y-4">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Title</p>
+                <h3 className="mt-2 text-base font-semibold text-slate-900">{issueDetail.title}</h3>
+                <p className="mt-2 text-sm text-slate-600">{issueDetail.description || "No description"}</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="rounded-xl border border-slate-200 p-3">
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Category</p>
+                  <p className="mt-1 font-medium text-slate-900">{issueDetail.category || "-"}</p>
+                </div>
+                <div className="rounded-xl border border-slate-200 p-3">
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Severity</p>
+                  <p className="mt-1 font-medium capitalize text-slate-900">{issueDetail.severity || "-"}</p>
+                </div>
+                <div className="rounded-xl border border-slate-200 p-3">
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Status</p>
+                  <p className="mt-1 font-medium capitalize text-slate-900">{issueDetail.status?.replace("_", " ") || "-"}</p>
+                </div>
+                <div className="rounded-xl border border-slate-200 p-3">
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Reporter</p>
+                  <p className="mt-1 font-medium text-slate-900">{issueDetail.reporter_name || "Unknown"}</p>
+                </div>
+              </div>
+
+              {issueDetail.address && (
+                <div className="rounded-xl border border-slate-200 p-3 text-sm">
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Address</p>
+                  <p className="mt-1 text-slate-800">{issueDetail.address}</p>
+                </div>
+              )}
+
+              {issueDetail.image && (
+                <div className="space-y-2">
+                  <p className="text-sm font-semibold text-slate-800">Uploaded Image</p>
+                  <img
+                    src={getIssueImageUrl(issueDetail.image)}
+                    alt="Uploaded issue evidence"
+                    className="max-h-72 w-full rounded-xl border border-slate-200 object-contain bg-white"
+                  />
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="py-6 text-center text-sm text-slate-600">No details found for this issue.</div>
+          )}
         </Modal>
       )}
     </div>

@@ -192,7 +192,7 @@ export default function RegisterPage() {
                   </div>
 
                   <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-                    <Input label="Full Name" type="text" placeholder="John Doe" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+                    <Input label="Full Name" type="text" placeholder="Aditya Bangar" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
                     <Input label="Email Address" type="email" placeholder="you@example.com" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
                     <Input label="Address" type="text" placeholder="Enter your Thane address" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} required />
                     <Input label="Pincode" type="text" placeholder="e.g. 400601" value={form.pincode} onChange={(e) => setForm({ ...form, pincode: e.target.value.replace(/\D/g, "").slice(0, 6) })} error={pincodeError} required />
